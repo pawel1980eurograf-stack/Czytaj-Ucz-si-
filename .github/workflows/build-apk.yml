@@ -1,0 +1,60 @@
+name: Zbuduj APK
+
+# Uruchamia się po każdej zmianie w repozytorium
+# oraz ręcznie: zakładka Actions → Zbuduj APK → Run workflow
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pobierz kod
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Zainstaluj zależności
+        run: npm install
+
+      - name: Dodaj platformę Android
+        run: npx cap add android
+
+      - name: Zsynchronizuj pliki aplikacji
+        run: npx cap sync android
+
+      - name: Zbuduj APK
+        run: |
+          chmod +x android/gradlew
+          cd android
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Zapisz APK jako plik do pobrania
+        uses: actions/upload-artifact@v4
+        with:
+          name: czytaj-i-ucz-sie-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Opublikuj APK w Releases (wygodne pobieranie na telefonie)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ github.run_number }}
+          name: Czytaj i ucz się — wersja ${{ github.run_number }}
+          body: |
+            Gotowy plik do zainstalowania na Androidzie.
+            Pobierz **app-debug.apk** poniżej i otwórz na telefonie.
+          files: android/app/build/outputs/apk/debug/app-debug.apk
