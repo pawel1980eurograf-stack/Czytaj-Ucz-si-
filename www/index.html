@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F2F1EC">
+<title>Czytaj i ucz się</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F2F1EC; --paper-2:#FAF9F6; --ink:#1B1A19; --ink-soft:#5C5A55;
+  --atrament:#2E2A82; --marker:#FFE066; --marker-deep:#F2C200; --on-marker:#1B1A19;
+  --mint:#1F8A6B; --coral:#C8483E; --line:rgba(27,26,25,.14); --known:rgba(31,138,107,.18);
+  --shadow:0 10px 30px rgba(27,26,25,.12);
+  --display:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;
+  --read:"Literata",Georgia,"Times New Roman",serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+body.dark{
+  --paper:#1A1A1E; --paper-2:#232329; --ink:#EAE7DF; --ink-soft:#96938B;
+  --atrament:#A9A2FF; --marker:#F5CE3E; --marker-deep:#C9A21B; --on-marker:#1A1A1E;
+  --mint:#4CC79C; --coral:#E4776B; --line:rgba(234,231,223,.16); --known:rgba(76,199,156,.2);
+  --shadow:0 10px 30px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--paper);color:var(--ink)}
+body{font-family:var(--read);overscroll-behavior-y:none;transition:background .25s ease,color .25s ease}
+button{font:inherit;color:inherit;border:none;background:none;cursor:pointer}
+input,select,textarea{font:inherit;color:inherit}
+svg{display:block}
+
+#app{max-width:720px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column}
+header{padding:14px 18px 10px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  position:sticky;top:0;z-index:20;background:var(--paper)}
+.brand{font-family:var(--display);font-weight:800;font-size:18px;letter-spacing:-.02em;line-height:1}
+.brand span{color:var(--atrament)}
+.hgroup{display:flex;align-items:center;gap:12px}
+.meter{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);letter-spacing:.02em;text-align:right;line-height:1.4}
+.meter b{color:var(--ink);font-weight:600}
+.themebtn{border:1px solid var(--line);width:34px;height:34px;display:grid;place-items:center;border-radius:50%;color:var(--ink-soft)}
+.themebtn:active{transform:scale(.94)}
+
+main{flex:1;padding:0 18px 130px}
+.view{display:none;animation:rise .28s ease both}
+.view.on{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin:18px 0 8px}
+
+.card{background:var(--paper-2);border:1px solid var(--line);border-radius:2px;padding:14px 15px;margin-bottom:10px;width:100%;text-align:left;display:block}
+.card:active{transform:translateY(1px)}
+.card h3{font-family:var(--display);font-weight:600;font-size:17.5px;margin:0 0 4px;letter-spacing:-.01em}
+.card .meta{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);letter-spacing:.06em;text-transform:uppercase}
+.lvl{display:inline-block;padding:1px 6px;border:1px solid var(--line);border-radius:1px;margin-right:8px}
+.card .done{color:var(--mint)}
+
+.backlink{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-soft);padding:10px 0;display:inline-block}
+h2.title{font-family:var(--display);font-weight:800;font-size:27px;line-height:1.1;letter-spacing:-.025em;margin:2px 0 6px}
+.subtitle{font-family:var(--mono);font-size:11px;color:var(--ink-soft);letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px}
+.prose{font-size:19px;line-height:1.78}
+.prose p{margin:0 0 1.15em}
+.hint{font-family:var(--mono);font-size:11px;line-height:1.6;color:var(--ink-soft);border-left:2px solid var(--marker-deep);padding:6px 0 6px 10px;margin:0 0 22px}
+.playbar{display:flex;gap:8px;margin:0 0 18px}
+.playbar button{flex:1;border:1px solid var(--line);background:var(--paper-2);padding:10px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:7px}
+.playbar button.act{border-color:var(--atrament);color:var(--atrament)}
+
+.w{cursor:pointer;border-radius:1px;padding:0 .5px}
+.w:hover{text-decoration:underline;text-decoration-color:var(--marker-deep);text-decoration-thickness:2px;text-underline-offset:3px}
+.w.pl{color:var(--on-marker);font-style:italic;background-image:linear-gradient(var(--marker),var(--marker));
+  background-repeat:no-repeat;background-position:0 .12em;background-size:100% 1.05em;
+  box-decoration-break:clone;-webkit-box-decoration-break:clone;padding:0 2px;margin:0 -1px;animation:swipe .34s cubic-bezier(.2,.8,.3,1) both}
+@keyframes swipe{from{background-size:0% 1.05em}to{background-size:100% 1.05em}}
+.w.loading{opacity:.45}
+.w.known{background-image:linear-gradient(var(--known),var(--known));background-repeat:no-repeat;background-position:0 .12em;background-size:100% 1.05em}
+.w.speaking{background-image:linear-gradient(var(--marker),var(--marker));background-repeat:no-repeat;background-position:0 .12em;background-size:100% 1.05em;color:var(--on-marker)}
+
+.wrow{display:flex;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid var(--line)}
+.wrow .en{font-family:var(--display);font-weight:600;font-size:16.5px}
+.wrow .pl{font-size:15px;color:var(--ink-soft);font-style:italic}
+.wrow .col{flex:1;min-width:0}
+.wrow .col div{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.due{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);white-space:nowrap}
+.due.now{color:var(--coral)}
+.iconbtn{color:var(--ink-soft);padding:6px}
+.iconbtn:active{color:var(--atrament)}
+.empty{border:1px dashed var(--line);padding:22px 16px;text-align:center;color:var(--ink-soft);font-size:15px;line-height:1.6;margin-top:10px}
+.empty b{font-family:var(--display);color:var(--ink);display:block;font-size:17px;margin-bottom:6px}
+
+.slip{background:var(--paper-2);border:1px solid var(--line);border-top:5px solid var(--marker);padding:34px 22px;text-align:center;margin-top:14px;box-shadow:var(--shadow);min-height:230px;display:flex;flex-direction:column;justify-content:center;gap:12px}
+.slip .en{font-family:var(--display);font-weight:800;font-size:34px;letter-spacing:-.03em;line-height:1.1;display:flex;align-items:center;justify-content:center;gap:10px}
+.slip .pl{font-size:22px;font-style:italic;color:var(--atrament);animation:rise .22s ease both}
+.slip .ctx{font-size:14.5px;line-height:1.65;color:var(--ink-soft);border-top:1px solid var(--line);padding-top:12px}
+.slip .ctx em{background:linear-gradient(var(--marker),var(--marker));color:var(--on-marker);font-style:normal;padding:0 2px}
+.reveal{margin-top:16px;width:100%;border:1px solid var(--ink);padding:14px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;background:var(--ink);color:var(--paper)}
+.grades{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:16px}
+.grade{border:1px solid var(--line);background:var(--paper-2);padding:12px 4px;text-align:center;line-height:1.3}
+.grade b{display:block;font-family:var(--display);font-weight:600;font-size:14px}
+.grade span{font-family:var(--mono);font-size:9.5px;color:var(--ink-soft)}
+.grade.g1{border-bottom:3px solid var(--coral)}
+.grade.g2{border-bottom:3px solid var(--marker-deep)}
+.grade.g3{border-bottom:3px solid var(--atrament)}
+.grade.g4{border-bottom:3px solid var(--mint)}
+
+/* stats */
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tile{border:1px solid var(--line);background:var(--paper-2);padding:14px}
+.tile .num{font-family:var(--display);font-weight:800;font-size:32px;letter-spacing:-.03em;line-height:1}
+.tile .lab{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-top:6px}
+.tile.accent .num{color:var(--atrament)}
+.tile.mintc .num{color:var(--mint)}
+.chart{display:flex;align-items:flex-end;gap:4px;height:120px;border-bottom:1px solid var(--line);padding-top:8px}
+.bar{flex:1;background:var(--atrament);min-height:2px;position:relative;opacity:.85;transition:height .4s ease}
+.bar.zero{background:var(--line)}
+.bar b{position:absolute;top:-15px;left:0;right:0;text-align:center;font-family:var(--mono);font-size:9px;color:var(--ink-soft);font-weight:400}
+.axis{display:flex;gap:4px;margin-top:5px}
+.axis span{flex:1;text-align:center;font-family:var(--mono);font-size:8.5px;color:var(--ink-soft)}
+.mix{display:flex;height:10px;margin-top:10px;border:1px solid var(--line)}
+.mix i{display:block;height:100%}
+.legend{display:flex;gap:14px;margin-top:8px;flex-wrap:wrap;font-family:var(--mono);font-size:10px;color:var(--ink-soft)}
+.legend i{display:inline-block;width:9px;height:9px;margin-right:5px;vertical-align:-1px}
+
+/* plan nauki + sesja */
+.chips{display:flex;gap:5px;margin:2px 0 12px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--paper-2);width:38px;height:38px;font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--ink-soft)}
+.chip.on{border-color:var(--atrament);color:var(--atrament);background:color-mix(in srgb,var(--atrament) 10%,var(--paper-2))}
+.opts{display:flex;gap:5px;margin:2px 0 12px;flex-wrap:wrap}
+.opt{border:1px solid var(--line);background:var(--paper-2);padding:8px 12px;font-family:var(--mono);font-size:11px;color:var(--ink-soft)}
+.opt.on{border-color:var(--atrament);color:var(--atrament)}
+.field{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);background:var(--paper-2);padding:11px 14px;margin-bottom:8px;font-size:15px}
+.field input[type=time]{border:1px solid var(--line);background:var(--paper);padding:6px 8px;font-family:var(--mono);font-size:14px}
+.goal{border-left:2px solid var(--atrament);padding:8px 0 8px 12px;font-family:var(--mono);font-size:11px;line-height:1.7;color:var(--ink-soft);margin:4px 0 18px}
+.goal b{color:var(--ink)}
+.sessionbar{border:1px solid var(--line);background:var(--paper-2);padding:11px 14px;margin-bottom:12px;display:flex;align-items:center;gap:12px;justify-content:space-between}
+.sessionbar .clock{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.02em}
+.sessionbar .lab{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+.sessionbar button{border:1px solid var(--line);padding:8px 12px;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase}
+.sessionbar button.go{border-color:var(--atrament);color:var(--atrament)}
+.prog{height:3px;background:var(--line);margin-bottom:12px}
+.prog i{display:block;height:100%;background:var(--atrament);transition:width .3s}
+.cover{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--mint);border:1px solid var(--line);padding:2px 6px;display:inline-block;margin-left:6px}
+.cover.warn{color:var(--coral)}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:30;display:grid;grid-template-columns:repeat(4,1fr);
+  background:var(--paper-2);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);max-width:720px;margin:0 auto}
+nav button{padding:10px 2px 12px;font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);position:relative}
+nav button .n{display:block;font-family:var(--display);font-size:15.5px;font-weight:600;letter-spacing:-.01em;text-transform:none;color:var(--ink);margin-bottom:1px}
+nav button.on{color:var(--atrament)}
+nav button.on .n{color:var(--atrament)}
+nav button.on::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--atrament)}
+.badge{position:absolute;top:5px;right:12%;background:var(--coral);color:#fff;font-family:var(--mono);font-size:9px;padding:1px 5px;border-radius:9px}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:92px;z-index:60;background:var(--ink);color:var(--paper);padding:9px 14px;font-size:14px;box-shadow:var(--shadow);max-width:90%;opacity:0;pointer-events:none;transition:opacity .2s,bottom .2s}
+.toast.on{opacity:1;bottom:100px}
+.toast i{color:var(--marker-deep);font-style:normal}
+.rowbtn{width:100%;text-align:left;border:1px solid var(--line);background:var(--paper-2);padding:13px 14px;margin-bottom:8px;font-size:15px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.rowbtn small{font-family:var(--mono);font-size:10px;color:var(--ink-soft);letter-spacing:.06em;text-transform:uppercase}
+.rowbtn .sw{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);padding:3px 8px;white-space:nowrap}
+.rowbtn .sw.on{border-color:var(--mint);color:var(--mint)}
+.gen{border-color:var(--atrament);color:var(--atrament)}
+input.txt{width:100%;border:1px solid var(--line);background:var(--paper-2);padding:12px;margin-bottom:8px;font-size:16px;border-radius:0}
+.spin{display:inline-block;width:11px;height:11px;border:2px solid var(--line);border-top-color:var(--atrament);border-radius:50%;animation:sp .7s linear infinite;vertical-align:-1px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+:focus-visible{outline:2px solid var(--atrament);outline-offset:2px}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="brand">Czytaj<span>&amp;</span>Ucz się</div>
+    <div class="hgroup">
+      <div class="meter" id="meter">…</div>
+      <button class="themebtn" id="themebtn" aria-label="Zmień motyw"></button>
+    </div>
+  </header>
+
+  <main>
+    <section class="view on" id="v-read"><div id="textlist"></div></section>
+
+    <section class="view" id="v-reader">
+      <button class="backlink" onclick="go('read')">← Wszystkie teksty</button>
+      <h2 class="title" id="r-title"></h2>
+      <div class="subtitle" id="r-sub"></div>
+      <div class="playbar">
+        <button id="playbtn"></button>
+        <button id="slowbtn"></button>
+      </div>
+      <div class="hint">Dotknij słowa, którego nie znasz — zamieni się na polskie i trafi do zakładki Słowa. Dotknij ponownie, żeby wrócić do angielskiego.</div>
+      <div class="prose" id="r-body"></div>
+    </section>
+
+    <section class="view" id="v-words">
+      <div class="eyebrow">Słowa do nauki</div>
+      <div id="wordlist"></div>
+    </section>
+
+    <section class="view" id="v-review">
+      <div class="eyebrow">Powtórki</div>
+      <div id="sessionbox"></div>
+      <div id="reviewbox"></div>
+    </section>
+
+    <section class="view" id="v-stats"><div id="statsbox"></div></section>
+  </main>
+
+  <nav>
+    <button id="n-read" class="on" onclick="go('read')"><span class="n">Teksty</span>czytaj</button>
+    <button id="n-words" onclick="go('words')"><span class="n">Słowa</span>zebrane</button>
+    <button id="n-review" onclick="go('review')"><span class="n">Powtórki</span>anki</button>
+    <button id="n-stats" onclick="go('stats')"><span class="n">Postępy</span>statystyki</button>
+  </nav>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const RAW = `
+a=jeden/jakiś|abandon=porzucać|ability=zdolność|able=zdolny|about=o, około|above=powyżej|abroad=za granicą|absolute=absolutny|
+absorb=wchłaniać|abuse=nadużycie|academic=akademicki|accent=akcent|accept=akceptować|access=dostęp|accident=wypadek|accompany=towarzyszyć|
+according=według|account=konto, relacja|accurate=dokładny|accuse=oskarżać|ache=ból|achieve=osiągać|acid=kwas|acknowledge=przyznawać|
+acquire=nabywać|across=przez, po drugiej stronie|act=działać / akt|action=działanie|active=aktywny|activity=czynność|actor=aktor|actress=aktorka|
+actually=właściwie|adapt=przystosować|add=dodawać|addition=dodatek|address=adres|adequate=wystarczający|adjust=dostosować|administration=administracja|
+admire=podziwiać|admit=przyznawać|adult=dorosły|advance=postęp, awansować|advantage=zaleta|adventure=przygoda|advertise=reklamować|advertisement=reklama|
+advice=rada|advise=radzić|affair=sprawa, romans|affect=wpływać na|afford=pozwolić sobie|afraid=przestraszony|after=po|afternoon=popołudnie|
+afterwards=potem|again=znowu|against=przeciw|age=wiek|agency=agencja|agent=agent|aggressive=agresywny|ago=temu|
+agree=zgadzać się|agreement=umowa|agriculture=rolnictwo|ahead=naprzód|aid=pomoc|aim=cel / celować|air=powietrze|aircraft=samolot|
+airport=lotnisko|alarm=alarm|album=album|alcohol=alkohol|alive=żywy|all=wszystko|allow=pozwalać|almost=prawie|
+alone=sam|along=wzdłuż|already=już|also=także|alter=zmieniać|alternative=alternatywa|although=chociaż|altogether=łącznie|
+aluminium=aluminium|always=zawsze|am=jestem|ambition=ambicja|ambulance=karetka|among=wśród|amount=ilość|an=jeden/jakiś|
+analyse=analizować|analysis=analiza|ancestor=przodek|ancient=starożytny|and=i|angel=anioł|anger=złość|angle=kąt|
+angry=zły, wściekły|animal=zwierzę|ankle=kostka|anniversary=rocznica|announce=ogłaszać|announcement=ogłoszenie|annoy=irytować|annual=roczny|
+another=inny|answer=odpowiadać / odpowiedź|answerphone=automatyczna sekretarka|anxiety=niepokój|anxious=niespokojny|any=jakikolwiek|anybody=ktokolwiek|anyone=ktokolwiek|
+anything=cokolwiek|apart=osobno|apartment=mieszkanie|apologise=przepraszać|apparent=widoczny|appeal=apelować, urok|appear=pojawiać się|appearance=wygląd|
+appetite=apetyt|applause=oklaski|apple=jabłko|application=aplikacja|apply=aplikować, stosować|appoint=mianować|appointment=wizyta, spotkanie|appreciate=doceniać|
+approach=podejście / zbliżać się|appropriate=odpowiedni|approve=zatwierdzać|approximately=w przybliżeniu|april=kwiecień|architect=architekt|architecture=architektura|are=są, jesteś|
+area=obszar|argue=kłócić się, argumentować|argument=kłótnia, argument|arm=ramię|army=armia|around=dookoła|arrange=organizować|arrangement=ustalenie|
+arrest=aresztować|arrival=przyjazd|arrive=przybyć|arrow=strzała|art=sztuka|article=artykuł|artificial=sztuczny|artist=artysta|
+as=jak, ponieważ|ash=popiół|ashamed=zawstydzony|aside=na bok|ask=pytać|asleep=śpiący|aspect=aspekt|assess=oceniać|
+asset=aktywa, atut|assignment=zadanie|assist=pomagać|assistant=asystent|associate=kojarzyć, wspólnik|association=stowarzyszenie|assume=zakładać|assure=zapewniać|
+astonish=zdumiewać|at=w, przy|ate=jadł|athlete=sportowiec|atmosphere=atmosfera|atom=atom|attach=przyczepiać|attack=atakować / atak|
+attempt=próba|attend=uczestniczyć|attention=uwaga|attitude=nastawienie|attract=przyciągać|attractive=atrakcyjny|audience=publiczność|audio=audio|
+august=sierpień|aunt=ciotka|author=autor|authority=władza, autorytet|automatic=automatyczny|autumn=jesień|available=dostępny|average=średni|
+avoid=unikać|awake=obudzony|award=nagroda|aware=świadomy|away=z dala|awful=okropny|awkward=niezręczny|baby=niemowlę|
+back=z powrotem / plecy|background=tło|backwards=do tyłu|bacteria=bakterie|bad=zły|badly=źle|bag=torba|bake=piec|
+balance=równowaga|balcony=balkon|bald=łysy|ball=piłka|ban=zakaz|band=zespół|bandage=bandaż|bank=bank|
+bar=bar, sztaba|bargain=okazja, targować się|bark=szczekać|barrier=bariera|base=podstawa|basement=piwnica|basic=podstawowy|basis=podstawa|
+basket=kosz|bath=kąpiel|bathroom=łazienka|battery=bateria|battle=bitwa|bay=zatoka|be=być|beach=plaża|
+beam=belka, promień|bean=fasola|bear=znosić / niedźwiedź|beard=broda|beat=bić, pokonać|beautiful=piękny|beauty=piękno|became=stał się|
+because=ponieważ|become=stawać się|bed=łóżko|bee=pszczoła|beef=wołowina|been=był (imiesłów)|beer=piwo|before=przed|
+beg=błagać|began=zaczął|begin=zaczynać|beginning=początek|behalf=w imieniu|behave=zachowywać się|behaviour=zachowanie|behind=za|
+being=będąc|belief=przekonanie|believe=wierzyć|bell=dzwonek|belong=należeć|below=poniżej|belt=pasek|bench=ławka|
+bend=zginać|beneath=pod|benefit=korzyść|berry=jagoda|beside=obok|besides=poza tym|best=najlepszy|bet=zakład|
+betray=zdradzać|better=lepszy|between=pomiędzy|beyond=poza|bible=biblia|bicycle=rower|bid=oferta, licytować|big=duży|
+bill=rachunek|billion=miliard|bin=kosz na śmieci|biology=biologia|bird=ptak|birth=narodziny|birthday=urodziny|biscuit=ciastko|
+bishop=biskup|bit=trochę|bite=gryźć|bitter=gorzki|black=czarny|blame=winić|blank=pusty|bless=błogosławić|
+blind=ślepy|block=kwartał ulic / blok|blond=blond|blood=krew|bloody=krwawy|blouse=bluzka|blow=dmuchać, cios|blue=niebieski|
+board=deska, zarząd|boast=chwalić się|boat=łódź|body=ciało|boil=gotować (wodę)|bold=śmiały|bomb=bomba|bond=więź, obligacja|
+bone=kość|bonus=premia|book=książka|boot=but, bagażnik|border=granica|bore=nudzić|boring=nudny|born=urodzony|
+borrow=pożyczać (od kogoś)|boss=szef|both=oba|bottle=butelka|bottom=dno, spód|bought=kupił|bounce=odbijać się|bound=zobowiązany, granica|
+bow=kłaniać się, łuk|bowl=miska|box=pudełko|boy=chłopiec|brain=mózg|brake=hamulec|branch=gałąź, oddział|brand=marka|
+brass=mosiądz|brave=odważny|bread=chleb|breadth=szerokość|break=łamać / przerwa|breakdown=awaria, załamanie|breakfast=śniadanie|breast=pierś|
+breath=oddech|breathe=oddychać|breed=hodować|brick=cegła|bridge=most|brief=krótki|bright=jasny, bystry|brilliant=genialny|
+bring=przynosić|broad=szeroki|broadcast=nadawać|broken=zepsuty|brother=brat|brought=przyniósł|brown=brązowy|brush=szczotka|
+bubble=bańka|bucket=wiadro|budget=budżet|bug=błąd, robak|build=budować|building=budynek|built=zbudował|bull=byk|
+bullet=kula|bunch=pęk, grupa|burden=ciężar|bureau=biuro|burglar=włamywacz|burn=palić|burst=pękać|bury=grzebać|
+bus=autobus|bush=krzak|business=biznes|busy=zajęty|but=ale|butcher=rzeźnik|butter=masło|button=guzik|
+buy=kupować|by=przez, obok|cabbage=kapusta|cabin=kabina|cabinet=szafka, gabinet|cable=kabel|cage=klatka|cake=ciasto|
+calculate=obliczać|calendar=kalendarz|call=dzwonić / nazywać|calm=spokojny|came=przyszedł|camera=aparat|camp=obóz|campaign=kampania|
+campus=kampus|can=móc|can't=nie może|canal=kanał|cancel=odwoływać|cancer=rak (choroba)|candidate=kandydat|candle=świeca|
+cannot=nie móc|canvas=płótno|cap=czapka|capable=zdolny|capacity=pojemność|capital=stolica, kapitał|captain=kapitan|capture=schwytać|
+car=samochód|carbon=węgiel|card=karta|cardboard=karton|care=troszczyć się|career=kariera|careful=ostrożny|careless=nieostrożny|
+cargo=ładunek|carpet=dywan|carriage=wagon, powóz|carrot=marchewka|carry=nieść|carve=rzeźbić|case=przypadek, sprawa|cash=gotówka|
+castle=zamek|casual=swobodny|cat=kot|catch=łapać|cathedral=katedra|cattle=bydło|caught=złapał|cause=powodować / przyczyna|
+cave=jaskinia|cease=przestać|ceiling=sufit|celebrate=świętować|celebration=świętowanie|cell=komórka|cellar=piwnica|cemetery=cmentarz|
+cent=cent|central=centralny|centre=środek, centrum|century=wiek, stulecie|ceremony=ceremonia|certain=pewien, niektóry|certificate=świadectwo|chain=łańcuch|
+chair=krzesło|chairman=przewodniczący|chalk=kreda|challenge=wyzwanie|champion=mistrz|chance=szansa|change=zmieniać / zmiana|channel=kanał|
+chapter=rozdział|character=charakter, postać|charge=opłata, ładować|charity=organizacja dobroczynna|charm=urok|chart=wykres|chase=gonić|chat=pogawędka|
+cheap=tani|cheat=oszukiwać|check=sprawdzać|cheek=policzek|cheerful=wesoły|cheese=ser|chemical=chemiczny|chemistry=chemia|
+cherry=wiśnia|chest=klatka piersiowa, skrzynia|chew=żuć|chicken=kurczak|chief=główny, szef|child=dziecko|childhood=dzieciństwo|children=dzieci|
+chimney=komin|chin=podbródek|chip=frytka, układ|chocolate=czekolada|choice=wybór|choir=chór|choose=wybierać|chop=siekać|
+chose=wybrał|church=kościół|cigarette=papieros|cinema=kino|circle=koło|circuit=obwód|circumstance=okoliczność|citizen=obywatel|
+city=miasto|civil=cywilny|civilisation=cywilizacja|claim=twierdzić, roszczenie|clap=klaskać|clarify=wyjaśniać|clash=starcie|class=klasa|
+classic=klasyczny|classroom=klasa|clay=glina|clean=czysty / sprzątać|clear=jasny|clever=sprytny|client=klient|cliff=klif|
+climate=klimat|climb=wspinać się|clinic=klinika|clip=spinacz, klip|clock=zegar|close=zamykać / blisko|closet=szafa|cloth=materiał|
+clothes=ubrania|cloud=chmura|club=klub|clue=wskazówka|coach=trener|coal=węgiel|coast=wybrzeże|coat=płaszcz|
+cocktail=koktajl|code=kod|coffee=kawa|coffin=trumna|coin=moneta|cold=zimny|collapse=zawalić się|collar=kołnierz|
+colleague=współpracownik|collect=zbierać|collection=kolekcja|college=uczelnia|colour=kolor|colourful=kolorowy|column=kolumna|comb=grzebień|
+combination=połączenie|combine=łączyć|come=przychodzić|comedy=komedia|comfort=wygoda, pocieszenie|comfortable=wygodny|command=rozkaz|comment=komentarz|
+commercial=handlowy, reklama|commission=prowizja, komisja|commit=popełnić, zobowiązać się|committee=komitet|common=powszechny, wspólny|communicate=komunikować się|community=społeczność|companion=towarzysz|
+company=firma|compare=porównywać|comparison=porównanie|compensate=rekompensować|compete=konkurować|competition=konkurs, konkurencja|complain=narzekać|complaint=skarga|
+complete=kompletny|complex=złożony|complicated=skomplikowany|component=element|compose=komponować|compound=związek|comprehensive=wszechstronny|compromise=kompromis|
+computer=komputer|conceal=ukrywać|concentrate=skupiać się|concept=pojęcie|concern=troska, dotyczyć|concert=koncert|conclude=wnioskować|conclusion=wniosek|
+concrete=beton, konkretny|condition=warunek, stan|conference=konferencja|confess=przyznać się|confidence=pewność siebie|confident=pewny siebie|confirm=potwierdzać|conflict=konflikt|
+confuse=mylić|confused=zdezorientowany|congratulate=gratulować|connect=łączyć|connection=połączenie|conscious=świadomy|consequence=konsekwencja|conservative=konserwatywny|
+consider=rozważać|consideration=rozwaga|consist=składać się|consistent=konsekwentny|constant=stały|constitution=konstytucja|construct=budować|construction=budowa|
+consult=konsultować|consume=konsumować|consumer=konsument|contact=kontakt|contain=zawierać|contemporary=współczesny|content=treść / zadowolony|contest=konkurs|
+context=kontekst|continent=kontynent|continue=kontynuować|continuous=ciągły|contract=umowa|contrast=kontrast|contribute=wnosić wkład|contribution=wkład|
+control=kontrolować|controversial=kontrowersyjny|convenient=wygodny|conventional=konwencjonalny|conversation=rozmowa|convert=przekształcać|convince=przekonać|cook=gotować|
+cool=chłodny|cooperate=współpracować|cope=radzić sobie|copper=miedź|copy=kopiować / kopia|copyright=prawa autorskie|core=rdzeń|corn=kukurydza|
+corner=róg|corporate=korporacyjny|correct=poprawny|correspond=odpowiadać, korespondować|corridor=korytarz|cost=kosztować / koszt|cottage=domek|cotton=bawełna|
+cough=kaszleć|could=mógł(by)|council=rada|count=liczyć|counter=lada, licznik|country=kraj|countryside=wieś|county=hrabstwo|
+couple=para|courage=odwaga|course=kurs|coursework=praca zaliczeniowa|court=sąd, kort|cousin=kuzyn|cover=zakrywać|cow=krowa|
+crab=krab|crack=pękać, szczelina|craft=rzemiosło|crash=zderzenie, awaria|crawl=czołgać się|crazy=szalony|cream=śmietana, krem|create=tworzyć|
+creative=kreatywny|creature=stworzenie|credit=kredyt, uznanie|crew=załoga|crime=przestępstwo|criminal=przestępca|crisis=kryzys|criterion=kryterium|
+critic=krytyk|critical=krytyczny|criticise=krytykować|crop=plon|cross=przechodzić przez / krzyż|crowd=tłum|crowded=zatłoczony|crown=korona|
+crucial=kluczowy|cruel=okrutny|cruise=rejs|crush=zgnieść|cry=płakać, krzyczeć|crystal=kryształ|cultural=kulturowy|culture=kultura|
+cup=kubek|cupboard=szafka|cure=leczyć / lekarstwo|curious=ciekawy|curl=lok, kręcić|currency=waluta|current=obecny / prąd|curriculum=program nauczania|
+curse=przekleństwo|curtain=zasłona|curve=krzywa|cushion=poduszka|custom=zwyczaj|customer=klient|cut=ciąć|cycle=cykl, jeździć na rowerze|
+daily=codzienny|dairy=nabiał|dam=tama|damage=uszkodzenie|damp=wilgotny|dance=tańczyć|dancer=tancerz|danger=niebezpieczeństwo|
+dangerous=niebezpieczny|dare=śmieć, odważyć się|dark=ciemny|dash=pęd, myślnik|data=dane|database=baza danych|date=data, randka|daughter=córka|
+dawn=świt|day=dzień|dead=martwy|deadline=termin|deaf=głuchy|deal=umowa, radzić sobie|dealt=poradził sobie|dear=drogi|
+death=śmierć|debate=debata|debt=dług|decade=dekada|december=grudzień|decent=przyzwoity|decide=decydować|decision=decyzja|
+deck=pokład|declare=deklarować|decorate=dekorować|decrease=zmniejszać|dedicate=poświęcać|deep=głęboki|defeat=pokonać / porażka|defence=obrona|
+defend=bronić|deficit=deficyt|define=definiować|definite=określony|definition=definicja|degree=stopień|delay=opóźnienie|delight=zachwyt|
+deliver=dostarczać|delivery=dostawa|demand=żądać / popyt|democracy=demokracja|demonstrate=demonstrować|dentist=dentysta|deny=zaprzeczać|department=dział|
+departure=odjazd|depend=zależeć|deposit=depozyt, wpłacać|depression=depresja|depth=głębokość|derive=wywodzić się|descend=schodzić|describe=opisywać|
+description=opis|desert=pustynia|deserve=zasługiwać|design=projektować|desire=pragnienie|desk=biurko|desperate=zdesperowany|despite=pomimo|
+dessert=deser|destination=cel podróży|destroy=niszczyć|destruction=zniszczenie|detail=szczegół|detailed=szczegółowy|detect=wykrywać|detective=detektyw|
+determine=ustalać|determined=zdeterminowany|develop=rozwijać|development=rozwój|device=urządzenie|devote=poświęcać|diagram=diagram|dial=wybierać numer|
+diamond=diament|diary=pamiętnik|dictionary=słownik|did=zrobił|didn't=nie zrobił|die=umierać|diet=dieta|differ=różnić się|
+difference=różnica|different=inny|difficult=trudny|dig=kopać|digital=cyfrowy|dignity=godność|dimension=wymiar|dining=jadalny|
+dinner=kolacja|dip=zanurzać|direct=bezpośredni, kierować|direction=kierunek / wskazówki|director=dyrektor|dirty=brudny|disabled=niepełnosprawny|disadvantage=wada|
+disagree=nie zgadzać się|disappear=znikać|disappoint=rozczarować|disappointed=rozczarowany|disaster=katastrofa|discipline=dyscyplina|discount=zniżka|discover=odkrywać|
+discovery=odkrycie|discuss=omawiać|discussion=dyskusja|disease=choroba|disgusting=obrzydliwy|dish=danie, naczynie|dismiss=odrzucać, zwalniać|display=wyświetlać|
+distance=odległość|distant=odległy|distinct=odrębny|distinguish=odróżniać|distribute=rozdzielać|district=dzielnica|disturb=przeszkadzać|dive=nurkować|
+diverse=różnorodny|divide=dzielić|division=podział|divorce=rozwód|do=robić|doctor=lekarz|document=dokument|documentary=film dokumentalny|
+does=robi|doesn't=nie|dog=pies|doing=robiąc|dolphin=delfin|domestic=domowy, krajowy|dominate=dominować|don't=nie|
+donate=przekazać|done=zrobiony|door=drzwi|double=podwójny|doubt=wątpić|down=w dół|download=pobierać|downstairs=na dole|
+dozen=tuzin|draft=szkic, projekt|drag=ciągnąć|drama=dramat|dramatic=dramatyczny|drank=pił|draw=rysować, ciągnąć|drawer=szuflada|
+drawing=rysunek|dream=śnić / marzenie|dress=sukienka, ubierać się|dresser=komoda|drill=wiertarka, ćwiczenie|drink=pić|drive=prowadzić|driven=prowadzony|
+driver=kierowca|drop=upuszczać, porzucać|drove=jechał|drown=tonąć|drug=lek, narkotyk|drum=bęben|dry=suchy|dryer=suszarka|
+duck=kaczka|due=należny, spodziewany|duke=książę|dull=nudny, tępy|dump=wysypisko, zrzucać|during=podczas|dust=kurz|duty=obowiązek|
+dying=umierający|dynamic=dynamiczny|each=każdy|eager=chętny|eagle=orzeł|ear=ucho|early=wcześnie|earn=zarabiać|
+earth=ziemia|earthquake=trzęsienie ziemi|ease=łatwość|easier=łatwiejszy|east=wschód|easy=łatwy|eat=jeść|echo=echo|
+ecology=ekologia|economic=ekonomiczny|economy=gospodarka|edge=krawędź|edition=wydanie|editor=redaktor|educate=kształcić|education=edukacja|
+educational=edukacyjny|effect=efekt|effective=skuteczny|efficient=wydajny|effort=wysiłek|egg=jajko|eight=osiem|eighteen=osiemnaście|
+eighth=ósmy|eighty=osiemdziesiąt|either=którykolwiek z dwóch|elbow=łokieć|elderly=starszy|elect=wybierać (w wyborach)|election=wybory|electric=elektryczny|
+electricity=elektryczność|electronic=elektroniczny|elegant=elegancki|element=element|elephant=słoń|eleven=jedenaście|eliminate=eliminować|else=inny, jeszcze|
+elsewhere=gdzie indziej|email=e-mail|embarrassed=zawstydzony|embassy=ambasada|emerge=wyłaniać się|emergency=nagły wypadek|emotion=emocja|emotional=emocjonalny|
+emphasis=nacisk|empire=imperium|employ=zatrudniać|employee=pracownik|employer=pracodawca|empty=pusty|enable=umożliwiać|encourage=zachęcać|
+end=koniec / kończyć|enemy=wróg|energy=energia|engagement=zaręczyny, zaangażowanie|engine=silnik|engineer=inżynier|engineering=inżynieria|enjoy=cieszyć się|
+enormous=ogromny|enough=wystarczająco|ensure=zapewniać|enter=wchodzić|enterprise=przedsiębiorstwo|entertainment=rozrywka|enthusiasm=entuzjazm|entire=cały|
+entrance=wejście|entry=wejście, wpis|envelope=koperta|environment=środowisko|episode=odcinek|equal=równy|equipment=sprzęt|equivalent=odpowiednik|
+error=błąd|escape=uciekać|especially=szczególnie|essay=esej, wypracowanie|essential=niezbędny|establish=zakładać, ustanawiać|estate=posiadłość|estimate=szacować|
+ethical=etyczny|evaluate=oceniać|even=nawet|evening=wieczór|event=wydarzenie|eventually=w końcu|ever=kiedykolwiek|every=każdy|
+everybody=wszyscy|everyday=codzienny|everyone=wszyscy|everything=wszystko|everywhere=wszędzie|evidence=dowody|evil=zło|exact=dokładny|
+exactly=dokładnie|exaggerate=przesadzać|exam=egzamin|examination=badanie, egzamin|examine=badać|example=przykład|excellent=doskonały|except=oprócz|
+exception=wyjątek|excess=nadmiar|exchange=wymiana|excited=podekscytowany|excitement=podekscytowanie|exciting=ekscytujący|exclude=wykluczać|excuse=wymówka, wybaczać|
+executive=kierownik|exercise=ćwiczenie|exhausted=wyczerpany|exhibition=wystawa|exist=istnieć|exit=wyjście|expand=rozszerzać|expect=oczekiwać|
+expectation=oczekiwanie|expedition=wyprawa|expense=wydatek|expensive=drogi|experience=doświadczenie|experiment=eksperyment|expert=ekspert|expertise=fachowa wiedza|
+explain=wyjaśniać|explanation=wyjaśnienie|explode=wybuchać|exploration=eksploracja|explore=badać, zwiedzać|explosion=wybuch|export=eksport|expose=wystawiać, ujawniać|
+express=wyrażać|expression=wyrażenie|extend=przedłużać|extension=rozszerzenie|extent=zakres|external=zewnętrzny|extra=dodatkowy|extraordinary=niezwykły|
+extreme=skrajny|eye=oko|fabric=tkanina|face=twarz|facility=obiekt, udogodnienie|fact=fakt|factor=czynnik|factory=fabryka|
+fail=zawodzić|failure=porażka|faint=słaby, zemdleć|fair=sprawiedliwy, jarmark|fairly=dość|faith=wiara|faithful=wierny|fake=fałszywy|
+fall=spadać|false=fałszywy|fame=sława|familiar=znajomy|family=rodzina|famous=sławny|fan=fan, wentylator|fancy=wymyślny, mieć ochotę|
+far=daleko|fare=opłata za przejazd|farewell=pożegnanie|farm=gospodarstwo|farmer=rolnik|fascinating=fascynujący|fashion=moda|fashionable=modny|
+fast=szybko|fasten=zapinać|fat=gruby, tłuszcz|fate=los|father=ojciec|fatigue=zmęczenie|fault=wina, usterka|favour=przysługa|
+favourite=ulubiony|fear=strach|feather=pióro|feature=cecha|february=luty|federal=federalny|fee=opłata|feed=karmić|
+feedback=informacja zwrotna|feel=czuć|feeling=uczucie|feet=stopy|fell=upadł|fellow=kolega|felt=czuł|female=kobieta, żeński|
+fence=płot|festival=festiwal|fever=gorączka|few=kilka, mało|fewer=mniej|fiction=fikcja|field=pole|fierce=zaciekły|
+fifteen=piętnaście|fifth=piąty|fifty=pięćdziesiąt|fight=walczyć|figure=postać, liczba|file=plik, teczka|fill=napełniać|film=film|
+filter=filtr|final=ostateczny|finally=w końcu|finance=finanse|financial=finansowy|find=znajdować|finding=odkrycie, ustalenie|fine=w porządku|
+finger=palec|finish=kończyć|fire=ogień|firm=firma, stanowczy|first=pierwszy|fish=ryba|fit=pasować|fitness=sprawność|
+five=pięć|fix=naprawiać|flag=flaga|flame=płomień|flash=błysk|flat=mieszkanie / płaski|flavour=smak|flee=uciekać|
+flesh=ciało, miąższ|flew=leciał|flexible=elastyczny|flight=lot|float=unosić się|flood=powódź|floor=piętro, podłoga|flour=mąka|
+flow=płynąć|flower=kwiat|flu=grypa|fluent=biegły|fly=latać|focus=skupienie|fog=mgła|fold=składać|
+folk=ludowy, ludzie|follow=podążać|following=następujący|fond=lubiący|food=jedzenie|foot=stopa|footprint=ślad stopy|for=dla, przez|
+forbid=zakazywać|force=siła, zmuszać|forecast=prognoza|forehead=czoło|foreign=zagraniczny|foreigner=obcokrajowiec|forest=las|forever=na zawsze|
+forget=zapominać|forgive=wybaczać|forgot=zapomniał|fork=widelec|form=forma|formal=formalny|format=format|former=były, poprzedni|
+formula=wzór|fortunately=na szczęście|fortune=fortuna, szczęście|forty=czterdzieści|forward=naprzód|fought=walczył|found=znalazł|foundation=fundament, fundacja|
+founder=założyciel|fountain=fontanna|four=cztery|fourteen=czternaście|fourth=czwarty|fraction=ułamek|fragile=kruchy|frame=rama|
+framework=struktura|frankly=szczerze|free=wolny, darmowy|freedom=wolność|freeze=zamarzać|frequency=częstotliwość|frequent=częsty|fresh=świeży|
+friday=piątek|fridge=lodówka|friend=przyjaciel|friendly=przyjazny|friendship=przyjaźń|frighten=przestraszyć|from=z, od|front=przód|
+frozen=zamrożony|fruit=owoc|frustrated=sfrustrowany|fry=smażyć|fuel=paliwo|fulfil=spełniać|full=pełny|fully=w pełni|
+fun=zabawa|function=funkcja|fund=fundusz|fundamental=podstawowy|funeral=pogrzeb|funny=zabawny|fur=futro|furious=wściekły|
+furniture=meble|further=dalszy|furthermore=ponadto|future=przyszłość|gain=zyskiwać|gallery=galeria|gambling=hazard|game=gra|
+gap=luka|garage=garaż|garbage=śmieci|garden=ogród|garlic=czosnek|gas=gaz, benzyna|gate=brama|gather=zbierać|
+gave=dał|gender=płeć|gene=gen|general=ogólny, generał|generally=ogólnie|generation=pokolenie|generous=hojny|genius=geniusz|
+gentle=delikatny|gentleman=dżentelmen|genuine=prawdziwy|geography=geografia|gesture=gest|get=dostawać, stawać się|ghost=duch|giant=olbrzym|
+gift=prezent|ginger=imbir|girl=dziewczyna|give=dawać|glad=zadowolony|glance=zerknąć|glass=szkło|global=globalny|
+globe=kula ziemska|glove=rękawiczka|glue=klej|go=iść|goal=cel, bramka|goat=koza|god=bóg|goes=idzie|
+going=idąc|gold=złoto|golden=złoty|golf=golf|gone=poszedł|good=dobry|goodbye=do widzenia|goods=towary|
+got=dostał|govern=rządzić|government=rząd|governor=gubernator|grab=chwycić|grade=ocena, stopień|graduate=absolwent, ukończyć studia|grain=ziarno|
+grand=wielki|grandfather=dziadek|grandmother=babcia|grant=dotacja, przyznawać|graph=wykres|grass=trawa|grateful=wdzięczny|grave=grób, poważny|
+gravity=grawitacja|great=świetny|greedy=chciwy|green=zielony|greenhouse=szklarnia|greet=witać|grew=rósł|grey=szary|
+grid=siatka|grill=grill|grin=uśmiech od ucha do ucha|grip=chwyt|grocery=sklep spożywczy|gross=brutto, obrzydliwy|ground=ziemia, grunt|group=grupa|
+grow=rosnąć|growth=wzrost|guarantee=gwarancja|guard=strażnik, pilnować|guess=zgadywać|guest=gość|guide=przewodnik|guilt=wina|
+guilty=winny|guitar=gitara|gun=broń|gym=siłownia|habit=nawyk|habitat=siedlisko|had=miał|hair=włosy|
+hairdresser=fryzjer|half=połowa|halfway=w połowie drogi|hall=hol, sala|hammer=młotek|hand=ręka|handle=poradzić sobie z, uchwyt|handsome=przystojny|
+handwriting=pismo odręczne|hang=wieszać|happen=zdarzać się|happy=szczęśliwy|hard=trudny, twardy|harder=trudniejszy|hardest=najtrudniejszy|hardly=ledwo|
+hardware=sprzęt|harm=szkodzić|harmful=szkodliwy|harvest=żniwa|has=ma|hat=kapelusz|hate=nienawidzić|have=mieć|
+hazard=zagrożenie|he=on|he's=on jest|head=głowa|headache=ból głowy|heading=nagłówek|headline=nagłówek|headquarters=siedziba główna|
+heal=leczyć|health=zdrowie|healthy=zdrowy|heap=stos|hear=słyszeć|heard=słyszał|heart=serce|heat=ciepło, ogrzewać|
+heaven=niebo|heavy=ciężki|hedge=żywopłot|heel=pięta|height=wysokość|held=trzymał|helicopter=helikopter|hell=piekło|
+hello=cześć|helmet=kask|help=pomagać|hence=stąd|her=jej|herb=zioło|here=tutaj|hero=bohater|
+hesitate=wahać się|hid=ukrył|hide=ukrywać|high=wysoki|highlight=podkreślać|highway=autostrada|hill=wzgórze|him=jemu|
+hint=wskazówka|hip=biodro|hire=wynajmować, zatrudniać|his=jego|historic=historyczny|history=historia|hit=uderzyć|hobby=hobby|
+hockey=hokej|hold=trzymać|hole=dziura|holiday=wakacje, święto|holy=święty|home=dom|homeless=bezdomny|honest=uczciwy|
+honey=miód|honeymoon=miesiąc miodowy|honour=honor|hook=hak|hope=mieć nadzieję|hopeless=beznadziejny|horizon=horyzont|horrible=okropny|
+horror=horror|horse=koń|hose=wąż ogrodowy|hospital=szpital|host=gospodarz|hot=gorący|hotel=hotel|hour=godzina|
+house=dom|household=gospodarstwo domowe|housing=mieszkalnictwo|how=jak|however=jednak|hug=przytulić|huge=ogromny|human=człowiek, ludzki|
+humanity=ludzkość|humble=skromny|humour=humor|hundred=sto|hunger=głód|hungry=głodny|hunt=polować|hurricane=huragan|
+hurry=spieszyć się|hurt=ranić, boleć|husband=mąż|hut=chata|hydrogen=wodór|hygiene=higiena|i=ja|i'm=jestem|
+i've=mam|ice=lód|icon=ikona|idea=pomysł|ideal=idealny|identical=identyczny|identify=identyfikować|identity=tożsamość|
+if=jeśli|ignore=ignorować|ill=chory|illegal=nielegalny|illness=choroba|illustrate=ilustrować|image=obraz, wizerunek|imagination=wyobraźnia|
+imagine=wyobrażać sobie|immediate=natychmiastowy|immediately=natychmiast|immigrant=imigrant|immune=odpornościowy|impact=wpływ|impatient=niecierpliwy|implement=wdrażać|
+implication=konsekwencja|imply=sugerować|import=import|importance=znaczenie|important=ważny|impose=narzucać|impossible=niemożliwy|impress=robić wrażenie|
+impression=wrażenie|impressive=imponujący|improve=poprawiać|improvement=poprawa|in=w|incident=zdarzenie|include=zawierać|including=w tym|
+income=dochód|increase=zwiększać|incredible=niesamowity|indeed=istotnie|independent=niezależny|indicate=wskazywać|individual=osoba, indywidualny|indoor=w pomieszczeniu|
+indoors=w środku|industrial=przemysłowy|industry=przemysł|inevitable=nieunikniony|infection=infekcja|inflation=inflacja|influence=wpływ|inform=informować|
+informal=nieformalny|information=informacja|ingredient=składnik|initial=początkowy|initiative=inicjatywa|injure=ranić|injury=uraz|ink=atrament|
+inner=wewnętrzny|innocent=niewinny|innovation=innowacja|input=wkład, dane wejściowe|inquiry=zapytanie|insect=owad|insert=wstawiać|inside=w środku|
+insist=nalegać|inspect=sprawdzać|inspire=inspirować|install=instalować|instance=przypadek|instant=natychmiastowy|instead=zamiast|institute=instytut|
+institution=instytucja|instruction=instrukcja|instrument=instrument|insult=obraza|insurance=ubezpieczenie|intelligence=inteligencja|intelligent=inteligentny|intend=zamierzać|
+intense=intensywny|intention=zamiar|interaction=interakcja|interest=zainteresowanie|interested=zainteresowany|interesting=ciekawy|interfere=wtrącać się|internal=wewnętrzny|
+international=międzynarodowy|internet=internet|interpret=interpretować|interrupt=przerywać|interval=przerwa, odstęp|interview=rozmowa kwalifikacyjna, wywiad|into=do (środka)|introduce=przedstawiać|
+invasion=inwazja|invent=wynaleźć|invention=wynalazek|invest=inwestować|investigate=badać|investigation=śledztwo|investment=inwestycja|invitation=zaproszenie|
+invite=zapraszać|involve=wiązać się z|involved=zaangażowany|iron=żelazo, żelazko|irritate=drażnić|is=jest|island=wyspa|isn't=nie jest|
+isolate=izolować|issue=kwestia, wydanie|it=to|it's=to jest|its=jego (rzeczy)|itself=samo|jacket=kurtka|jail=więzienie|
+jam=dżem, korek|january=styczeń|jar=słoik|jaw=szczęka|jazz=jazz|jealous=zazdrosny|jelly=galaretka|jet=odrzutowiec|
+jewel=klejnot|job=praca|jog=biegać (dla zdrowia)|join=dołączyć|joint=wspólny, staw|joke=żart|journal=dziennik, czasopismo|journalist=dziennikarz|
+journey=podróż|joy=radość|judge=sędzia, oceniać|jug=dzbanek|juice=sok|july=lipiec|jump=skakać|june=czerwiec|
+jungle=dżungla|junior=młodszy|jury=ława przysięgłych|just=właśnie, tylko|justice=sprawiedliwość|justify=uzasadniać|keen=chętny, zapalony|keep=trzymać, zachowywać|
+kept=trzymał|kettle=czajnik|key=klucz|keyboard=klawiatura|kick=kopać|kid=dzieciak|kidney=nerka|kill=zabijać|
+kind=rodzaj / miły|kindness=życzliwość|king=król|kingdom=królestwo|kiss=pocałunek|kit=zestaw|kitchen=kuchnia|knee=kolano|
+kneel=klękać|knew=wiedział|knife=nóż|knock=pukać|knot=węzeł|know=wiedzieć, znać|knowledge=wiedza|label=etykieta|
+laboratory=laboratorium|labour=praca, robocizna|lack=brak|ladder=drabina|lady=pani|lake=jezioro|lamb=jagnięcina|lamp=lampa|
+land=ziemia, lądować|landscape=krajobraz|lane=pas ruchu, uliczka|language=język|lap=kolana, okrążenie|laptop=laptop|large=duży|largely=w dużej mierze|
+laser=laser|last=ostatni / trwać|late=późno|lately=ostatnio|later=później|latter=drugi z dwóch|laugh=śmiać się|laughter=śmiech|
+launch=wystrzelić, uruchomić|laundry=pranie|law=prawo|lawyer=prawnik|lay=kłaść|layer=warstwa|lazy=leniwy|lead=prowadzić|
+leader=przywódca|leadership=przywództwo|leading=wiodący|leaf=liść|league=liga|leak=przeciek|lean=opierać się, chudy|learn=uczyć się|
+learner=uczący się|lease=dzierżawa|least=najmniej|leather=skóra|leave=zostawiać, wychodzić|lecture=wykład|led=prowadził|left=lewy, zostawiony|
+leg=noga|legal=legalny, prawny|leisure=czas wolny|lemon=cytryna|lend=pożyczać (komuś)|length=długość|lens=soczewka|less=mniej|
+lesson=lekcja|let=pozwalać|letter=list, litera|level=poziom|liberal=liberalny|library=biblioteka|licence=licencja|lid=pokrywka|
+lie=leżeć / kłamać|life=życie|lifestyle=styl życia|lifetime=życie, okres życia|lift=podnosić, winda|light=światło / lekki|like=lubić / jak|likely=prawdopodobny|
+likewise=podobnie|limb=kończyna|limit=ograniczenie|limited=ograniczony|line=linia|linen=pościel, len|link=łącze, łączyć|lion=lew|
+lip=warga|liquid=płyn|list=lista|listen=słuchać|literally=dosłownie|literature=literatura|litter=śmieci|little=mały, mało|
+live=mieszkać, żyć|lively=żywy|liver=wątroba|load=ładunek|loan=pożyczka|lobby=hol, lobby|local=lokalny|lock=zamek, zamykać na klucz|
+log=dziennik, kłoda|logic=logika|logical=logiczny|lonely=samotny|long=długi|look=patrzeć, wyglądać|loop=pętla|loose=luźny|
+lord=lord, pan|lorry=ciężarówka|lose=tracić|loss=strata|lost=stracił|lot=dużo|lots=mnóstwo|loud=głośny|
+louder=głośniejszy|loudly=głośno|lounge=salon|love=kochać|lovely=uroczy|low=niski|lower=niższy, obniżać|loyal=lojalny|
+luck=szczęście|lucky=szczęśliwy|luggage=bagaż|lunch=obiad, lunch|lung=płuco|luxury=luksus|machine=maszyna|mad=szalony, wściekły|
+made=zrobił (od make)|magazine=czasopismo|magic=magia|magnet=magnes|mail=poczta|main=główny|mainly=głównie|maintain=utrzymywać|
+maintenance=konserwacja|major=główny, poważny|majority=większość|make=robić|makeup=makijaż|male=mężczyzna, męski|mall=centrum handlowe|man=mężczyzna|
+manage=zarządzać, dawać radę|manager=kierownik|manner=sposób|manual=ręczny, instrukcja|manufacture=produkować|manuscript=rękopis|many=wiele|map=mapa|
+marathon=maraton|marble=marmur|march=maszerować|margin=margines|marine=morski|mark=znak, oceniać|market=rynek|marketing=marketing|
+marriage=małżeństwo|marry=poślubić|marvellous=cudowny|mask=maska|mass=masa|master=mistrz, opanować|match=mecz, pasować|mate=kolega, partner|
+material=materiał|mathematics=matematyka|maths=matematyka|matter=mieć znaczenie / sprawa|mature=dojrzały|maximum=maksimum|may=móc|maybe=może|
+mayor=burmistrz|me=mnie|meal=posiłek|mean=znaczyć|meaning=znaczenie|means=środki, sposób|meant=miał na myśli|meanwhile=tymczasem|
+measure=mierzyć / miara|measurement=pomiar|meat=mięso|mechanic=mechanik|mechanism=mechanizm|medal=medal|media=media|medical=medyczny|
+medicine=lekarstwo, medycyna|meditation=medytacja|medium=średni|meet=spotykać|meeting=spotkanie|melt=topić się|member=członek|membership=członkostwo|
+memorial=pomnik|memorise=zapamiętywać|memory=pamięć / wspomnienie|mental=psychiczny|mention=wspominać|menu=menu|merchant=kupiec|mercy=litość|
+mere=zwykły|merely=jedynie|merge=łączyć|mess=bałagan|message=wiadomość|met=spotkał|metal=metal|method=metoda|
+metre=metr|microphone=mikrofon|middle=środek|midnight=północ|might=mógłby|migration=migracja|mild=łagodny|military=wojskowy|
+milk=mleko|mill=młyn|million=milion|mind=umysł|mine=mój / kopalnia|mineral=minerał|minimum=minimum|minister=minister|
+ministry=ministerstwo|minor=drobny|minority=mniejszość|minute=minuta|miracle=cud|mirror=lustro|miss=tęsknić, przegapić|missing=brakujący|
+mission=misja|mistake=błąd|misunderstand=źle zrozumieć|mix=mieszać|mixture=mieszanka|mobile=komórkowy, ruchomy|model=model|moderate=umiarkowany|
+modern=nowoczesny|modest=skromny|moist=wilgotny|moment=chwila|monday=poniedziałek|money=pieniądze|monitor=monitor, monitorować|monkey=małpa|
+monster=potwór|month=miesiąc|monthly=miesięczny|monument=pomnik|mood=nastrój|moon=księżyc|moral=moralny|more=więcej|
+moreover=ponadto|morning=poranek|mortgage=kredyt hipoteczny|most=najbardziej, większość|mostly=przeważnie|mother=matka|motion=ruch|motivate=motywować|
+motivation=motywacja|motor=silnik|motorway=autostrada|mount=góra, wsiadać|mountain=góra|mourn=opłakiwać|mouse=mysz|mouth=usta|
+move=ruszać się, przeprowadzać się|movement=ruch|movie=film|much=dużo|mud=błoto|mug=kubek|multiple=wielokrotny|multiply=mnożyć|
+municipal=miejski|murder=morderstwo|muscle=mięsień|museum=muzeum|mushroom=grzyb|music=muzyka|must=musieć|my=mój|
+mysterious=tajemniczy|mystery=tajemnica|myth=mit|nail=paznokieć, gwóźdź|naked=nagi|name=imię, nazwa|namely=mianowicie|nanny=niania|
+napkin=serwetka|narrative=narracja|narrow=wąski|nasty=paskudny|nation=naród|national=narodowy|nationality=narodowość|native=rodzimy|
+natural=naturalny|naturally=naturalnie|nature=natura|naughty=niegrzeczny|navy=marynarka wojenna|near=blisko|nearly=prawie|neat=schludny|
+necessarily=koniecznie|necessary=konieczny|necessity=konieczność|neck=szyja|need=potrzebować|negative=negatywny|negotiate=negocjować|neighbour=sąsiad|
+neighbourhood=okolica|neither=żaden z dwóch|nephew=siostrzeniec|nerve=nerw|nervous=zdenerwowany|nest=gniazdo|net=sieć|network=sieć|
+neutral=neutralny|never=nigdy|nevertheless=niemniej jednak|new=nowy|news=wiadomości|newspaper=gazeta|next=następny|nice=miły|
+niece=siostrzenica|night=noc|nightmare=koszmar|nine=dziewięć|nineteen=dziewiętnaście|ninety=dziewięćdziesiąt|ninth=dziewiąty|no=nie|
+nobody=nikt|nod=kiwać głową|noise=hałas|noisy=hałaśliwy|none=żaden|nonsense=bzdura|noon=południe|normal=normalny|
+north=północ|nose=nos|not=nie|note=notatka, zauważyć|nothing=nic|notice=zauważyć / ogłoszenie|notification=powiadomienie|novel=powieść|
+november=listopad|now=teraz|nowadays=obecnie|nowhere=nigdzie|nuclear=jądrowy|number=liczba|numerous=liczny|nurse=pielęgniarka|
+nut=orzech|nutrition=odżywianie|o'clock=godzina|oak=dąb|obesity=otyłość|obey=słuchać, być posłusznym|object=przedmiot|objective=cel, obiektywny|
+obligation=obowiązek|observation=obserwacja|observe=obserwować|obstacle=przeszkoda|obtain=uzyskiwać|obvious=oczywisty|occasion=okazja|occasionally=od czasu do czasu|
+occupation=zawód, okupacja|occupy=zajmować|occur=zdarzać się|occurrence=zdarzenie|ocean=ocean|october=październik|odd=dziwny, nieparzysty|odds=szanse|
+of=z, od|off=z dala, wyłączony|offence=przestępstwo, obraza|offend=obrażać|offensive=obraźliwy|offer=oferować|offering=oferta|office=biuro|
+officer=oficer, funkcjonariusz|official=oficjalny, urzędnik|often=często|oil=olej, ropa|ok=ok|okay=w porządku|old=stary|on=na|
+once=raz, kiedyś|one=jeden|ongoing=trwający|onion=cebula|online=online|only=tylko|onto=na|open=otwierać|
+operate=obsługiwać, operować|operation=operacja|opinion=opinia|opponent=przeciwnik|opportunity=okazja|oppose=sprzeciwiać się|opposite=przeciwny, naprzeciwko|optimistic=optymistyczny|
+option=opcja|or=lub|orange=pomarańcza|orbit=orbita|orchestra=orkiestra|order=zamawiać / porządek|ordinary=zwykły|organic=organiczny|
+organisation=organizacja|organise=organizować|organiser=organizator|orientation=orientacja|origin=pochodzenie|original=oryginalny, pierwotny|ornament=ozdoba|orphan=sierota|
+other=inny|otherwise=w przeciwnym razie|ought=powinien|our=nasz|ourselves=my sami|out=na zewnątrz|outcome=wynik|outdoor=na zewnątrz|
+outdoors=na dworze|outline=zarys|output=wydajność, wynik|outside=na zewnątrz|outstanding=wybitny|oval=owalny|oven=piekarnik|over=nad, po|
+overall=ogólnie|overcome=przezwyciężyć|overnight=przez noc|overseas=za granicą|overtake=wyprzedzać|overweight=z nadwagą|owe=być winnym (pieniądze)|own=własny / posiadać|
+owner=właściciel|oxygen=tlen|pace=tempo|pack=pakować|package=paczka|packet=paczka|page=strona|paid=zapłacił|
+pain=ból|painful=bolesny|paint=malować / farba|painting=obraz|pair=para|palace=pałac|pale=blady|pan=patelnia|
+panel=panel|panic=panika|paper=papier|paragraph=akapit|parallel=równoległy|parcel=paczka|parent=rodzic|park=park, parkować|
+parliament=parlament|part=część|participant=uczestnik|participate=uczestniczyć|particular=szczególny|particularly=szczególnie|partner=partner|party=impreza, partia|
+pass=mijać, zdać|passage=fragment, przejście|passenger=pasażer|passion=pasja|passive=bierny|passport=paszport|password=hasło|past=przeszłość, obok|
+pasta=makaron|patch=łata|path=ścieżka|patience=cierpliwość|patient=pacjent, cierpliwy|pattern=wzór|pause=pauza|pavement=chodnik|
+pay=płacić|payment=płatność|peace=pokój (brak wojny)|peaceful=spokojny|peak=szczyt|pearl=perła|peculiar=osobliwy|pedestrian=pieszy|
+peel=obierać|peer=rówieśnik|pen=długopis|penalty=kara|pencil=ołówek|pension=emerytura|people=ludzie|pepper=pieprz|
+per=na|perceive=postrzegać|percent=procent|percentage=procent|perfect=doskonały|perfectly=idealnie|perform=wykonywać, występować|performance=występ, wydajność|
+perhaps=być może|period=okres|permanent=stały|permission=pozwolenie|permit=zezwalać|person=osoba|personal=osobisty|persuade=przekonywać|
+pest=szkodnik|pet=zwierzę domowe|petrol=benzyna|phase=faza|phenomenon=zjawisko|philosophy=filozofia|phone=telefon|photo=zdjęcie|
+photograph=fotografia|photography=fotografia|phrase=zwrot|physical=fizyczny|physics=fizyka|piano=pianino|pick=wybierać, podnosić|picture=obrazek, zdjęcie|
+piece=kawałek|pierce=przekłuwać|pig=świnia|pigeon=gołąb|pile=stos|pill=tabletka|pillow=poduszka|pilot=pilot|
+pin=szpilka|pine=sosna|pink=różowy|pint=kufel, pinta|pioneer=pionier|pipe=rura|pitch=boisko, rzucać|pity=szkoda, litość|
+place=miejsce|plain=zwykły, prosty|plan=plan|plane=samolot|planet=planeta|planning=planowanie|plant=roślina, sadzić|plastic=plastik|
+plate=talerz|platform=peron|play=grać, bawić się|playground=plac zabaw|pleasant=przyjemny|please=proszę|pleased=zadowolony|pleasure=przyjemność|
+plenty=mnóstwo|plot=fabuła, działka|plug=wtyczka|plus=plus|pocket=kieszeń|poem=wiersz|poet=poeta|point=punkt, sens|
+poison=trucizna|pole=biegun, słup|police=policja|policy=polityka, zasada|polish=polerować|polite=uprzejmy|political=polityczny|politics=polityka|
+pollution=zanieczyszczenie|pond=staw|pool=basen|poor=biedny|pop=pop, strzelać|popular=popularny|popularity=popularność|population=populacja|
+porch=ganek|pork=wieprzowina|port=port|portion=porcja|portrait=portret|pose=pozować|position=pozycja, stanowisko|positive=pozytywny|
+possess=posiadać|possession=posiadanie|possibility=możliwość|possible=możliwy|possibly=możliwe|post=poczta, stanowisko|postpone=odkładać|pot=garnek|
+potato=ziemniak|potential=potencjał|pound=funt|pour=nalewać|poverty=bieda|powder=proszek|power=władza, moc|powerful=potężny|
+practical=praktyczny|practice=praktyka|practise=ćwiczyć|praise=chwalić|pray=modlić się|precious=cenny|precise=precyzyjny|predict=przewidywać|
+prefer=woleć|preference=preferencja|pregnancy=ciąża|pregnant=w ciąży|prejudice=uprzedzenie|preparation=przygotowanie|prepare=przygotowywać|prescription=recepta|
+presence=obecność|present=obecny, prezent|presentation=prezentacja|preserve=zachowywać|president=prezydent|press=naciskać, prasa|pressure=ciśnienie, presja|presumably=przypuszczalnie|
+pretend=udawać|pretty=ładny, dość|prevent=zapobiegać|prevention=zapobieganie|previous=poprzedni|previously=wcześniej|price=cena|pride=duma|
+priest=ksiądz|primarily=przede wszystkim|primary=podstawowy|prince=książę|principal=główny, dyrektor|principle=zasada|print=drukować|printer=drukarka|
+priority=priorytet|prison=więzienie|prisoner=więzień|privacy=prywatność|private=prywatny|prize=nagroda|probability=prawdopodobieństwo|probably=prawdopodobnie|
+problem=problem|procedure=procedura|proceed=przystępować|process=proces|produce=produkować|product=produkt|production=produkcja|productive=produktywny|
+profession=zawód|professional=zawodowy|professor=profesor|profile=profil|profit=zysk|profitable=dochodowy|program=program|programme=program|
+progress=postęp|prohibit=zakazywać|project=projekt|promise=obietnica|promote=promować|promotion=awans, promocja|prompt=szybki, skłaniać|pronounce=wymawiać|
+pronunciation=wymowa|proof=dowód|proper=właściwy|property=własność, nieruchomość|proportion=proporcja|proposal=propozycja|propose=proponować|prospect=perspektywa|
+protect=chronić|protection=ochrona|protein=białko|protest=protest|proud=dumny|prove=udowodnić|provide=zapewniać|province=prowincja|
+psychology=psychologia|pub=pub|public=publiczny|publication=publikacja|publicity=rozgłos|publish=publikować|pull=ciągnąć|pump=pompa|
+punch=uderzać pięścią|punish=karać|punishment=kara|pupil=uczeń|purchase=zakup|pure=czysty|purple=fioletowy|purpose=cel|
+pursue=dążyć do|push=pchać|put=kłaść|puzzle=zagadka|pyramid=piramida|qualification=kwalifikacja|qualify=kwalifikować się|quality=jakość|
+quantity=ilość|quarrel=kłótnia|quarter=ćwierć, kwartał|queen=królowa|question=pytanie|queue=kolejka|quick=szybki|quickly=szybko|
+quiet=cichy|quietly=cicho|quite=całkiem|quiz=quiz|quote=cytat, wycena|rabbit=królik|race=wyścig, rasa|racism=rasizm|
+racket=rakieta|radiation=promieniowanie|radio=radio|rail=szyna|railway=kolej|rain=deszcz|rainbow=tęcza|raise=podnosić, wychowywać|
+ran=biegł|random=losowy|range=zakres|rank=ranga|rapid=szybki|rare=rzadki|rarely=rzadko|rat=szczur|
+rate=tempo, stawka|rather=raczej|rating=ocena|ratio=stosunek|raw=surowy|reach=sięgać|react=reagować|reaction=reakcja|
+read=czytać|reader=czytelnik|readily=chętnie, łatwo|reading=czytanie|ready=gotowy|real=prawdziwy|realise=uświadomić sobie|realistic=realistyczny|
+reality=rzeczywistość|really=naprawdę|rear=tył|reason=powód|reasonable=rozsądny|rebuild=odbudować|receipt=paragon|receive=otrzymywać|
+recent=niedawny|reception=recepcja, przyjęcie|recipe=przepis|recognise=rozpoznawać|recognition=rozpoznanie|recommend=polecać|recommendation=rekomendacja|record=nagrywać / zapis|
+recording=nagranie|recover=wracać do zdrowia|recovery=powrót do zdrowia|recruit=rekrutować|recycle=przetwarzać|red=czerwony|reddish=czerwonawy|reduce=zmniejszać|
+reduction=redukcja|refer=odnosić się|reference=odniesienie|reflect=odbijać, zastanawiać się|reform=reforma|refresh=odświeżać|refrigerator=lodówka|refugee=uchodźca|
+refund=zwrot pieniędzy|refuse=odmawiać|regard=uważać, wzgląd|regarding=odnośnie|regardless=bez względu|regime=reżim|region=region|register=rejestrować|
+registration=rejestracja|regret=żałować|regular=regularny|regularly=regularnie|regulation=przepis|rehearsal=próba|reject=odrzucać|rejection=odrzucenie|
+relate=odnosić się, wiązać|relationship=związek|relative=krewny, względny|relatively=stosunkowo|relax=odprężać się|release=uwalniać, wydawać|relevant=istotny|reliable=niezawodny|
+relief=ulga|religion=religia|reluctant=niechętny|rely=polegać|remain=pozostawać|remark=uwaga|remarkable=niezwykły|remedy=lekarstwo|
+remember=pamiętać|remind=przypominać|reminder=przypomnienie|remote=zdalny, odległy|removal=usunięcie|remove=usuwać|renew=odnawiać|rent=czynsz, wynajmować|
+rental=wynajem|repair=naprawiać|repeat=powtarzać|replace=zastępować|replacement=zamiennik|reply=odpowiadać|report=raport|represent=reprezentować|
+representative=przedstawiciel|reputation=reputacja|request=prośba|require=wymagać|requirement=wymóg|rescue=ratować|research=badania|researcher=badacz|
+resemble=przypominać|reservation=rezerwacja|reserve=rezerwować|residence=miejsce zamieszkania|resident=mieszkaniec|resign=rezygnować|resist=opierać się|resistance=opór|
+resolution=postanowienie, rozdzielczość|resolve=rozwiązywać|resort=kurort, uciekać się|resource=zasób|respect=szacunek|respectively=odpowiednio|respond=odpowiadać|response=odpowiedź|
+responsibility=odpowiedzialność|responsible=odpowiedzialny|rest=reszta / odpoczywać|restaurant=restauracja|restore=przywracać|restrict=ograniczać|restriction=ograniczenie|result=wynik|
+retail=detaliczny|retire=przejść na emeryturę|retirement=emerytura|return=wracać, zwracać|reveal=ujawniać|reverse=odwracać|review=recenzja, przegląd|revision=powtórka, korekta|
+revolution=rewolucja|reward=nagroda|rhythm=rytm|rib=żebro|ribbon=wstążka|rice=ryż|rich=bogaty|rid=pozbyć się|
+riding=jazda konna|rifle=karabin|right=prawy, właściwy|ring=dzwonić / pierścionek|rise=wznosić się|risk=ryzyko|ritual=rytuał|rival=rywal|
+river=rzeka|road=droga|roast=piec, pieczony|rob=okradać|robot=robot|rock=skała|rocket=rakieta|rod=pręt|
+role=rola|roll=toczyć, zwijać|romantic=romantyczny|roof=dach|room=pokój|root=korzeń|rope=lina|rose=wzrósł|
+rough=szorstki, przybliżony|roughly=z grubsza|round=okrągły, wokół|route=trasa|routine=rutyna|row=rząd|royal=królewski|rub=pocierać|
+rubber=guma|rubbish=śmieci, bzdury|ruin=ruina, rujnować|rule=zasada|ruler=władca, linijka|rumour=plotka|run=biegać|runner=biegacz|
+rural=wiejski|rush=pędzić|sack=worek, zwalniać|sacred=święty|sacrifice=poświęcenie|sad=smutny|saddle=siodło|sadly=niestety|
+safe=bezpieczny|safety=bezpieczeństwo|said=powiedział|sail=żeglować|sailor=marynarz|saint=święty|sake=wzgląd, dobro|salad=sałatka|
+salary=pensja|sale=wyprzedaż, sprzedaż|salmon=łosoś|salon=salon|salt=sól|salty=słony|same=ten sam|sample=próbka|
+sanction=sankcja|sand=piasek|sandal=sandał|sandwich=kanapka|sang=śpiewał|sat=siedział|satellite=satelita|satisfaction=satysfakcja|
+satisfied=zadowolony|satisfy=zadowalać|saturday=sobota|sauce=sos|saucer=spodek|sausage=kiełbasa|save=ratować, oszczędzać|saving=oszczędność|
+saw=zobaczył|say=mówić|scale=skala|scan=skanować|scandal=skandal|scar=blizna|scarce=rzadki|scared=przestraszony|
+scarf=szalik|scatter=rozrzucać|scenario=scenariusz|scene=scena|scenery=krajobraz|schedule=harmonogram|scheme=schemat, program|scholar=uczony|
+scholarship=stypendium|school=szkoła|science=nauka|scientific=naukowy|scientist=naukowiec|scissors=nożyczki|scope=zakres|score=wynik, zdobyć punkt|
+scratch=drapać|scream=krzyczeć|screen=ekran|screw=śruba|script=scenariusz|sculpture=rzeźba|sea=morze|seal=foka, pieczęć|
+search=szukać|seaside=nadmorski|season=pora roku, sezon|seasonal=sezonowy|seat=miejsce siedzące|second=drugi / sekunda|secondary=drugorzędny, średni|secret=tajemnica|
+secretary=sekretarka|section=sekcja|sector=sektor|secure=bezpieczny|security=bezpieczeństwo|see=widzieć|seed=nasiono|seek=szukać|
+seem=wydawać się|seemingly=pozornie|segment=segment|seize=chwytać|seldom=rzadko|select=wybierać|selection=wybór|selfish=samolubny|
+sell=sprzedawać|semester=semestr|senate=senat|send=wysyłać|senior=starszy|sense=zmysł, sens|sensible=rozsądny|sensitive=wrażliwy|
+sensitivity=wrażliwość|sent=wysłał|sentence=zdanie, wyrok|separate=oddzielny, oddzielać|september=wrzesień|sequence=sekwencja|sergeant=sierżant|series=seria|
+serious=poważny|serve=obsługiwać, serwować|service=usługa|serving=porcja|session=sesja|set=zestaw, ustawiać|settle=osiedlić się, załatwić|settlement=osada, ugoda|
+seven=siedem|seventeen=siedemnaście|seventh=siódmy|seventy=siedemdziesiąt|several=kilka|severe=poważny, surowy|sew=szyć|sex=płeć, seks|
+shade=cień|shadow=cień|shake=potrząsać|shall=będę, czy mam|shallow=płytki|shame=wstyd|shampoo=szampon|shape=kształt|
+share=dzielić się, udział|shark=rekin|sharp=ostry|sharply=ostro|shave=golić|she=ona|she's=ona jest|shed=szopa|
+sheep=owca|sheet=arkusz, prześcieradło|shelf=półka|shell=muszla, skorupa|shelter=schronienie|shift=zmiana|shine=świecić|shiny=błyszczący|
+ship=statek|shirt=koszula|shock=szok|shocked=zszokowany|shoe=but|shone=świecił|shoot=strzelać|shop=sklep|
+shopkeeper=sklepikarz|shopping=zakupy|shore=brzeg|short=krótki|shortage=niedobór|shortly=wkrótce|shot=strzelił|should=powinien|
+shoulder=ramię|shout=krzyczeć|show=pokazywać|showed=pokazał|shower=prysznic|shrink=kurczyć się|shrug=wzruszać ramionami|shut=zamykać|
+shy=nieśmiały|sibling=rodzeństwo|sick=chory|side=strona|sight=wzrok, widok|sightseeing=zwiedzanie|sign=znak, podpisywać|signal=sygnał|
+significant=znaczący|silence=cisza|silent=cichy|silk=jedwab|silly=głupi|silver=srebro|similar=podobny|similarity=podobieństwo|
+similarly=podobnie|simple=prosty|simplify=upraszczać|simply=po prostu|since=od, ponieważ|sincere=szczery|sing=śpiewać|singer=piosenkarz|
+singing=śpiew|single=pojedynczy|sink=zlew, tonąć|sir=proszę pana|sister=siostra|sit=siedzieć|site=miejsce, strona|situated=położony|
+situation=sytuacja|six=sześć|sixteen=szesnaście|sixth=szósty|sixty=sześćdziesiąt|size=rozmiar|sketch=szkic|ski=narta|
+skill=umiejętność|skilled=wykwalifikowany|skin=skóra|skirt=spódnica|sky=niebo|slap=policzek, uderzać|slave=niewolnik|sleep=spać / sen|
+sleeve=rękaw|slept=spał|slice=plaster|slide=ślizgać się|slight=niewielki|slightly=nieco|slim=szczupły|slip=poślizgnąć się|
+slogan=hasło|slope=zbocze|slow=powolny|slowly=powoli|small=mały|smart=inteligentny, elegancki|smell=zapach, wąchać|smile=uśmiechać się|
+smoke=dym, palić|smoker=palacz|smooth=gładki|smoothly=gładko|snack=przekąska|snake=wąż|sneeze=kichać|snow=śnieg|
+so=więc, tak|soap=mydło|soccer=piłka nożna|social=społeczny|society=społeczeństwo|socket=gniazdko|sofa=kanapa|soft=miękki|
+software=oprogramowanie|soil=gleba|solar=słoneczny|sold=sprzedał|soldier=żołnierz|solid=solidny, stały|solution=rozwiązanie|solve=rozwiązywać|
+some=trochę, niektóre|somebody=ktoś|somehow=jakoś|someone=ktoś|something=coś|sometime=kiedyś|sometimes=czasami|somewhat=nieco|
+somewhere=gdzieś|son=syn|song=piosenka|soon=wkrótce|sophisticated=wyrafinowany|sorrow=smutek|sorry=przepraszam, przykro|sort=rodzaj, sortować|
+sought=szukał|soul=dusza|sound=brzmieć / dźwięk|soup=zupa|sour=kwaśny|source=źródło|south=południe|souvenir=pamiątka|
+space=przestrzeń, kosmos|spare=zapasowy, oszczędzić|spark=iskra|sparkling=musujący|speak=mówić|speaker=mówca, głośnik|special=specjalny|specialist=specjalista|
+speciality=specjalność|species=gatunek|specific=konkretny|specify=określać|spectacular=spektakularny|spectator=widz|speech=mowa, przemówienie|speed=prędkość|
+spell=przeliterować|spend=spędzać, wydawać|spent=wydał, spędził|spider=pająk|spill=rozlewać|spin=kręcić|spine=kręgosłup|spirit=duch|
+spite=złość, mimo|splendid=wspaniały|split=podzielił|spoil=psuć|spoke=mówił|sponsor=sponsor|spontaneous=spontaniczny|spoon=łyżka|
+sport=sport|spot=miejsce, plamka|spouse=małżonek|spray=spryskiwać|spread=rozprzestrzeniać|spring=wiosna, sprężyna|square=kwadrat, plac|stability=stabilność|
+stable=stabilny, stajnia|stadium=stadion|staff=personel|stage=etap / scena|stain=plama|stair=schodek|stall=stragan|stamp=znaczek|
+stance=postawa|stand=stać|standard=standard|standing=stojący|staple=zszywka, podstawowy|star=gwiazda|start=zaczynać|starve=głodować|
+state=stan, państwo|statement=oświadczenie|station=stacja|statistic=statystyka|statue=posąg|status=status|stay=zostać|steady=stały|
+steal=kraść|steam=para|steel=stal|steep=stromy|steer=kierować|stem=łodyga|step=krok|stereotype=stereotyp|
+stick=kij, przyklejać|sticky=lepki|stiff=sztywny|still=wciąż|stimulate=stymulować|stir=mieszać|stock=zapas, akcje|stomach=żołądek|
+stomachache=ból brzucha|stone=kamień|stood=stał|stop=zatrzymywać|storage=przechowywanie|store=sklep, przechowywać|storey=piętro|storm=burza|
+story=historia|straight=prosty|straightforward=prosty, jasny|strain=napięcie, nadwyrężyć|strange=dziwny|strategy=strategia|straw=słoma, słomka|strawberry=truskawka|
+stream=strumień|street=ulica|strength=siła|stress=stres, nacisk|stretch=rozciągać|strict=surowy|strike=strajk, uderzać|string=sznurek|
+stripe=pasek|stroke=udar, głaskać|strong=silny|stronger=silniejszy|strongly=mocno|structure=struktura|struggle=zmagać się|stuck=utknął|
+student=uczeń, student|studio=studio|study=uczyć się|stuff=rzeczy|stumble=potykać się|stunning=oszałamiający|stupid=głupi|style=styl|
+subject=temat, przedmiot|submit=przesyłać|subsequent=następujący|substance=substancja|substantial=znaczny|substitute=zastępca|subtle=subtelny|suburb=przedmieście|
+subway=metro|succeed=odnieść sukces|success=sukces|successful=udany|successfully=pomyślnie|such=taki|sudden=nagły|suddenly=nagle|
+suffer=cierpieć|suffering=cierpienie|sufficient=wystarczający|sugar=cukier|suggest=sugerować|suggestion=sugestia|suicide=samobójstwo|suit=garnitur, pasować|
+suitable=odpowiedni|suitcase=walizka|summary=podsumowanie|summer=lato|summit=szczyt|sun=słońce|sunday=niedziela|sunlight=światło słoneczne|
+sunny=słoneczny|sunrise=wschód słońca|sunset=zachód słońca|sunshine=słońce|superior=lepszy, przełożony|supermarket=supermarket|supervise=nadzorować|supplement=dodatek|
+supply=dostarczać, zapas|support=wspierać|supporter=zwolennik|suppose=przypuszczać|sure=pewny|surely=z pewnością|surface=powierzchnia|surgery=operacja, gabinet|
+surprise=niespodzianka|surprised=zaskoczony|surprising=zaskakujący|surround=otaczać|surrounding=otaczający|survey=ankieta, badanie|survival=przetrwanie|survive=przetrwać|
+suspect=podejrzewać|suspicion=podejrzenie|suspicious=podejrzliwy|sustain=podtrzymywać|swallow=połykać|swam=pływał|swap=zamieniać|swear=przysięgać, przeklinać|
+sweat=pot|sweater=sweter|sweep=zamiatać|sweet=słodki|swelling=obrzęk|swim=pływać|swing=huśtać się|switch=przełącznik, przełączać|
+sword=miecz|syllable=sylaba|symbol=symbol|sympathy=współczucie|symptom=objaw|syrup=syrop|system=system|table=stół|
+tablet=tabletka, tablet|tackle=zająć się|tag=metka|tail=ogon|tailor=krawiec|take=brać|talent=talent|talented=utalentowany|
+talk=rozmawiać|tall=wysoki|tank=zbiornik, czołg|tap=kran, stukać|tape=taśma|target=cel|tariff=taryfa|task=zadanie|
+taste=smak, smakować|taught=uczył|tax=podatek|tea=herbata|teach=uczyć (kogoś)|teacher=nauczyciel|teaching=nauczanie|team=zespół|
+tear=łza, rozdzierać|technology=technologia|teenager=nastolatek|teeth=zęby|telephone=telefon|telescope=teleskop|television=telewizja|tell=powiedzieć|
+temper=temperament|temperature=temperatura|temporary=tymczasowy|tempt=kusić|ten=dziesięć|tend=mieć skłonność|tendency=tendencja|tender=czuły, delikatny|
+tennis=tenis|tension=napięcie|tent=namiot|tenth=dziesiąty|term=termin, semestr|terminal=terminal|terms=warunki|terrible=okropny|
+terrific=świetny|territory=terytorium|terror=przerażenie|test=test|testament=testament|text=tekst|textbook=podręcznik|texture=faktura|
+than=niż|thank=dziękować|that=to, że|that's=to jest|the=ten/ta/to|theatre=teatr|theft=kradzież|their=ich|
+them=ich, im|theme=motyw|then=potem, wtedy|theoretical=teoretyczny|theory=teoria|therapy=terapia|there=tam|there's=tam jest|
+therefore=dlatego|thermometer=termometr|these=te|thesis=teza, praca dyplomowa|they=oni|they're=oni są|thick=gruby|thief=złodziej|
+thin=cienki, chudy|thing=rzecz|think=myśleć|third=trzeci|thirsty=spragniony|thirteen=trzynaście|thirty=trzydzieści|this=to|
+thoroughly=dokładnie|those=tamte|though=chociaż|thought=myśl / myślał|thoughtful=troskliwy|thousand=tysiąc|thread=nić|threat=groźba|
+threaten=grozić|three=trzy|threw=rzucił|thrill=dreszczyk|throat=gardło|through=przez|throughout=przez cały|throw=rzucać|
+thumb=kciuk|thunder=grzmot|thursday=czwartek|thus=zatem|ticket=bilet|tidy=posprzątać, schludny|tie=krawat, wiązać|tight=ciasny|
+tighten=zaciskać|till=aż do|timber=drewno|time=czas|timetable=rozkład jazdy|tin=puszka|tiny=malutki|tip=napiwek, wskazówka|
+tired=zmęczony|tissue=chusteczka, tkanka|title=tytuł|to=do|toast=tost, toast|tobacco=tytoń|today=dzisiaj|toe=palec u nogi|
+together=razem|toilet=toaleta|token=żeton, znak|told=powiedział|tolerate=tolerować|toll=opłata drogowa|tomato=pomidor|tomb=grobowiec|
+tomorrow=jutro|tone=ton|tongue=język (w ustach)|tonight=dziś wieczorem|tonne=tona|too=też, zbyt|took=wziął|tool=narzędzie|
+tooth=ząb|toothbrush=szczoteczka|top=góra, szczyt|topic=temat|torch=latarka|tore=rozdarł|torture=tortury|toss=rzucać|
+total=całkowity|touch=dotykać|tough=trudny, twardy|tour=wycieczka|tourism=turystyka|tourist=turysta|tournament=turniej|tow=holować|
+towards=w kierunku|towel=ręcznik|tower=wieża|town=miasteczko|toxic=toksyczny|toy=zabawka|trace=ślad|track=tor, ścieżka|
+trade=handel|trader=handlowiec|tradition=tradycja|traffic=ruch uliczny|trail=szlak|trailer=przyczepa, zwiastun|train=pociąg|trainer=trener, but sportowy|
+training=szkolenie|trait=cecha|transaction=transakcja|transfer=transfer, przenosić|transform=przekształcać|transition=przejście|translate=tłumaczyć|translation=tłumaczenie|
+transmit=przekazywać|transparent=przezroczysty|transport=transport|trap=pułapka|travel=podróżować|treasure=skarb|treat=traktować|treatment=leczenie|
+treaty=traktat|tree=drzewo|tremendous=ogromny|trend=trend|trendy=modny|trial=próba, proces|triangle=trójkąt|tribe=plemię|
+tribute=hołd|trick=sztuczka|trigger=wyzwalacz|trim=przycinać|trip=wycieczka|triumph=triumf|trolley=wózek|troop=oddział|
+trophy=trofeum|tropical=tropikalny|trouble=kłopot|troublesome=kłopotliwy|trousers=spodnie|truck=ciężarówka|true=prawdziwy|trunk=pień, bagażnik|
+trust=ufać|truth=prawda|try=próbować|tube=rura, tubka|tuesday=wtorek|tuition=czesne, korepetycje|tumble=upadać|tune=melodia|
+tunnel=tunel|turkey=indyk|turn=obracać, skręcać|turnover=obroty|tutor=korepetytor|twelve=dwanaście|twenty=dwadzieścia|twice=dwa razy|
+twin=bliźniak|twist=skręcać|two=dwa|type=typ, pisać na klawiaturze|typewriter=maszyna do pisania|typical=typowy|tyre=opona|ugly=brzydki|
+ultimate=ostateczny|ultimately=ostatecznie|umbrella=parasol|unable=niezdolny|unaware=nieświadomy|uncertain=niepewny|uncle=wujek|unclear=niejasny|
+uncomfortable=niewygodny|under=pod|undergo=przechodzić|underground=podziemny, metro|underline=podkreślać|understand=rozumieć|understanding=zrozumienie|understood=zrozumiał|
+undertake=podejmować się|underwear=bielizna|undo=cofnąć|unemployed=bezrobotny|unexpected=nieoczekiwany|unfair=niesprawiedliwy|unfamiliar=nieznany|unfortunately=niestety|
+unhappy=nieszczęśliwy|unhealthy=niezdrowy|uniform=mundurek|union=związek|unit=jednostka|unite=jednoczyć|unity=jedność|universal=uniwersalny|
+universe=wszechświat|university=uniwersytet|unknown=nieznany|unless=chyba że|unlike=w przeciwieństwie do|unlikely=mało prawdopodobny|unlock=odblokować|unnecessary=niepotrzebny|
+unpleasant=nieprzyjemny|unsafe=niebezpieczny|until=aż do|unusual=niezwykły|up=w górę|update=aktualizacja|upgrade=ulepszenie|upload=przesyłać|
+upon=na|upper=górny|upset=zdenerwowany|upstairs=na górze|urge=namawiać, chęć|urgent=pilny|us=nas|usage=użycie|
+use=używać|useful=przydatny|useless=bezużyteczny|user=użytkownik|usual=zwykły|usually=zwykle|utility=użyteczność, media|vacant=wolny, pusty|
+vacation=wakacje|vaccine=szczepionka|vague=niejasny|valid=ważny, słuszny|valley=dolina|valuable=cenny|value=wartość|van=furgonetka|
+vanish=znikać|variety=różnorodność|various=różne|vary=różnić się|vast=ogromny|vegetable=warzywo|vegetarian=wegetarianin|vehicle=pojazd|
+venture=przedsięwzięcie|venue=miejsce wydarzenia|verb=czasownik|verdict=werdykt|verify=weryfikować|verse=wers|version=wersja|versus=kontra|
+vertical=pionowy|very=bardzo|vessel=naczynie, statek|veteran=weteran|via=przez|vibrate=wibrować|victim=ofiara|victory=zwycięstwo|
+video=wideo|videotape=taśma wideo|view=widok, pogląd|viewer=widz|village=wieś|vinegar=ocet|violence=przemoc|violent=gwałtowny|
+violin=skrzypce|virtual=wirtualny|virtue=cnota|virus=wirus|visa=wiza|visible=widoczny|vision=wizja, wzrok|visit=odwiedzać|
+visitor=gość|visual=wizualny|vital=kluczowy|vitamin=witamina|vocabulary=słownictwo|voice=głos|volume=głośność, objętość|voluntary=dobrowolny|
+volunteer=ochotnik|vote=głosować|voter=wyborca|voyage=rejs|vulnerable=wrażliwy, narażony|wage=wynagrodzenie|wagon=wóz|waist=talia|
+wait=czekać|waiter=kelner|wake=budzić się|walk=iść, spacerować|wall=ściana|wallet=portfel|wander=wędrować|want=chcieć|
+war=wojna|ward=oddział szpitalny|wardrobe=szafa|warehouse=magazyn|warm=ciepły|warmth=ciepło|warn=ostrzegać|warning=ostrzeżenie|
+warrant=nakaz|warranty=gwarancja|warrior=wojownik|was=był|wash=myć|washing=pranie|wasp=osa|waste=marnować, odpady|
+watch=oglądać|water=woda|waterproof=wodoodporny|wave=fala, machać|way=sposób, droga|we=my|we're=jesteśmy|we've=mamy|
+weak=słaby|weakness=słabość|wealth=bogactwo|wealthy=zamożny|weapon=broń|wear=nosić (ubranie)|weather=pogoda|weave=tkać|
+website=strona internetowa|wedding=ślub|wednesday=środa|weed=chwast|week=tydzień|weekly=tygodniowy|weigh=ważyć|weight=waga|
+welcome=witać|welfare=dobrobyt, opieka|well=dobrze|went=poszedł|were=byli|west=zachód|wet=mokry|whale=wieloryb|
+what=co|wheat=pszenica|wheel=koło|wheelchair=wózek inwalidzki|when=kiedy|whenever=kiedykolwiek|where=gdzie|whereas=podczas gdy|
+wherever=gdziekolwiek|whether=czy|which=który|while=podczas gdy|whip=bat, ubijać|whisky=whisky|whisper=szeptać|whistle=gwizdać|
+white=biały|who=kto|whole=cały|wholly=całkowicie|whose=czyj|why=dlaczego|wide=szeroki|widely=szeroko|
+widespread=powszechny|widow=wdowa|width=szerokość|wife=żona|wild=dziki|wildlife=dzika przyroda|will=będzie|willing=chętny|
+willingly=chętnie|willingness=chęć|win=wygrywać|wind=wiatr|window=okno|windy=wietrzny|wine=wino|wing=skrzydło|
+winner=zwycięzca|winter=zima|wipe=wycierać|wire=drut|wireless=bezprzewodowy|wisdom=mądrość|wise=mądry|wish=życzyć|
+with=z|withdraw=wycofać, wypłacić|within=w ciągu|without=bez|witness=świadek|wolf=wilk|woman=kobieta|won=wygrał|
+won't=nie będzie|wonder=zastanawiać się|wonderful=cudowny|wood=drewno, las|wooden=drewniany|wool=wełna|word=słowo|wore=nosił|
+work=pracować / praca|worker=pracownik|workplace=miejsce pracy|workshop=warsztat|world=świat|worldwide=na całym świecie|worm=robak|worried=zmartwiony|
+worry=martwić się|worse=gorszy|worship=czcić|worst=najgorszy|worth=wart|worthwhile=wart zachodu|worthy=godny|would=by, chciałby|
+wound=rana|wrap=zawijać|wrist=nadgarstek|write=pisać|written=napisany|wrong=zły, błędny|wrote=napisał|x-ray=prześwietlenie|
+yacht=jacht|yard=podwórko, jard|yawn=ziewać|year=rok|yellow=żółty|yes=tak|yesterday=wczoraj|yet=jeszcze, jednak|
+yield=przynosić, ustępować|yoghurt=jogurt|yolk=żółtko|you=ty|you're=jesteś|young=młody|youngster=młodzieniec|your=twój|
+yours=twój|youth=młodość|zebra=zebra|zero=zero|zip=zamek błyskawiczny|zone=strefa|zoo=zoo|`;
+const DICT={};
+RAW.split("|").forEach(p=>{const s=p.trim();if(!s)return;const i=s.indexOf("=");if(i<0)return;const k=s.slice(0,i).trim().toLowerCase(),v=s.slice(i+1).trim();if(k&&v&&!DICT[k])DICT[k]=v;});
+const WORDLIST=Object.keys(DICT);
+
+/* ---------- teksty ---------- */
+const BUILTIN=[
+{id:"t1",lvl:"A2",title:"A Long Day in the City",body:`Anna wakes up early. The sky outside her window is still grey and the street below is quiet. She makes a cup of coffee, opens the window and listens to the city. Somewhere a dog is barking. A bus stops at the corner and a few people get on.
+
+At eight o'clock she leaves the house. The walk to the station takes ten minutes. Today the train is late again, so she waits on the platform and reads the news on her phone. When the train finally comes, there are no free seats, and she stands near the door with her bag between her feet.
+
+Anna works in a small office near the river. Her job is not difficult, but there is always a lot to do. She answers emails, talks to customers on the phone and writes short reports. At lunch she buys a sandwich and eats it outside, on a bench by the water. The sun is warm now. For twenty minutes she does not think about work at all.
+
+In the afternoon her boss asks her to finish a report before Friday. Anna is tired, but she says yes. She knows she can do it.
+
+She comes home at seven. The flat is cold, so she puts on a sweater and cooks a simple dinner: rice, eggs and vegetables. Later she calls her sister and they laugh about something stupid. Before she goes to bed, she opens the window again. The city is louder now, but she sleeps well.`},
+{id:"t2",lvl:"A2+",title:"The First Week at a New Job",body:`On Monday morning Tomek stands in front of a tall glass building and checks the time again. He is twenty minutes early. He walks around the block once, then goes inside.
+
+A woman at the desk gives him a card with his name on it. "Fourth floor," she says. "They are waiting for you."
+
+Nobody is waiting for him. The office is almost empty. A man with grey hair looks up from his computer, shakes his hand and shows him a desk near the window. "This is yours. Your laptop should arrive tomorrow. Or on Wednesday."
+
+For two days Tomek does almost nothing. He reads old documents, learns the names of people he will forget by lunch, and drinks too much bad coffee. He begins to think that he made a mistake.
+
+On Thursday everything changes. His manager asks him to join a meeting with a client. Tomek understands maybe half of what they say. There are strange words, short forms, jokes he does not get. But at the end he asks one simple question, and the room becomes quiet. The client thinks for a moment and then says: "That is a very good point."
+
+On Friday evening, walking to the bus, Tomek feels different. He still knows almost nothing about the company. But he knows that he can learn it.`},
+{id:"t3",lvl:"B1",title:"Living in Another Country",body:`People often say that the hardest part of living abroad is the language. In my experience, that is only true for the first few months.
+
+When I moved to another country, I could already speak the language quite well. I could order food, ask for directions and understand the news. What I could not do was understand people. I did not know why my neighbours never invited anyone home, why my colleagues laughed at certain jokes, or why nobody talked about money.
+
+The small things were the most difficult. Shops closed at strange hours. Nobody answered emails on Sunday. When I said "we should meet sometime", people wrote it in their calendars, and I learned to be careful with promises.
+
+I also discovered that I became a slightly different person in my second language. I was more polite, and less funny. My voice sounded flat to me. Sometimes I stayed quiet in a group not because I had nothing to say, but because saying it would take too long.
+
+After two years, most of that disappeared. I still make mistakes every day. I still miss the food, and certain conversations with old friends. But now I have two places that feel like home, and neither of them is complete without the other.
+
+If you are thinking about moving abroad, do not wait until your English is perfect. It never will be. Go, and let the language follow you.`},
+{id:"t4",lvl:"B1+",title:"Why We Need Sleep",body:`Everyone knows that sleep is important, but few people treat it that way. We cut it first when we are busy, as if it were free time that we can simply take back later.
+
+During the night the brain is far from silent. It moves through several stages of sleep, again and again. In deep sleep the body repairs muscles and builds bone, and the immune system becomes stronger. Later, in the stage when we dream, the brain seems to organise the memories of the day, keeping what matters and quietly dropping the rest.
+
+This is why a student who studies all night usually remembers less than one who studies less and then sleeps. Without sleep, new information stays weak and disappears fast.
+
+The effects of too little sleep appear quickly. After a few short nights most people react more slowly, make more mistakes and find it harder to control their emotions. Many drivers on the road are, in practice, as dangerous as if they had been drinking.
+
+The advice is boring, because it always is: go to bed and get up at similar times, keep the room dark and cool, and leave the phone in another room. Light in the evening tells the body that the day is not over yet.
+
+Nobody becomes healthy in a single night. But almost everything else you are trying to improve — your memory, your mood, your work — becomes easier when you finally sleep enough.`},
+{id:"t5",lvl:"B2",title:"The Phone in Your Pocket",body:`A hundred years ago a person could disappear for an afternoon and nobody would think about it. Today, if we do not answer a message within an hour, someone begins to worry, or to be annoyed.
+
+The phone in your pocket is probably the most useful object you own. It is a map, a camera, a bank, a library and a ticket. It has also quietly changed what we expect from each other. We assume that everybody is available all the time, and that any question can be answered immediately.
+
+The problem is not the technology itself but the way it fits into our attention. Companies do not sell us phones and then lose interest; they sell our attention to somebody else. Every notification, every small red circle, was designed by people who are very good at their job.
+
+None of this means we should throw our phones into the river. Most attempts to escape completely fail after a week, and they miss the point. What works better is boring and practical: fewer applications that send notifications, a screen that is grey instead of colourful, and a rule about where the phone sleeps at night.
+
+Attention is the one thing we cannot buy more of. It is worth deciding, at least once, who gets it.`}];
+
+const IC={
+speaker:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>',
+play:'<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"/></svg>',
+stop:'<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12"/></svg>',
+sun:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>',
+moon:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>'};
+
+/* ---------- stan ---------- */
+const KEY="czytaj-ucz-sie:v3";
+
+/* Warstwa zapisu: Capacitor Preferences w apce, localStorage w przeglądarce,
+   window.storage w podglądzie artefaktu. Jedno miejsce do podmiany. */
+const CAP=()=>window.Capacitor&&window.Capacitor.Plugins||{};
+const Store={
+  async get(k){
+    const P=CAP().Preferences;
+    if(P){const r=await P.get({key:k});return r.value?{value:r.value}:null;}
+    if(window.storage){try{return await window.storage.get(k);}catch(e){}}
+    try{const v=localStorage.getItem(k);return v?{value:v}:null;}catch(e){return null;}
+  },
+  async set(k,v){
+    const P=CAP().Preferences;
+    if(P)return P.set({key:k,value:v});
+    if(window.storage){try{return await window.storage.set(k,v);}catch(e){}}
+    try{localStorage.setItem(k,v);}catch(e){}
+  },
+  async del(k){
+    const P=CAP().Preferences;
+    if(P)return P.remove({key:k});
+    if(window.storage){try{return await window.storage.delete(k);}catch(e){}}
+    try{localStorage.removeItem(k);}catch(e){}
+  }
+};
+
+let S={words:{},texts:[],read:{},hist:{},theme:"light",speakTap:true,rate:.92,lastReviewDay:"",reviewedToday:0,
+  plan:{on:false,days:[1,2,3,4,5],hour:19,min:0,minutes:10,perDay:1},lastNotify:"",apiKey:""};
+let saveT=null;
+function save(){clearTimeout(saveT);saveT=setTimeout(async()=>{try{await Store.set(KEY,JSON.stringify(S));}catch(e){}},350);}
+async function load(){
+  for(const k of [KEY,"czytaj-ucz-sie:v2","czytaj-ucz-sie:v1"]){
+    try{const r=await Store.get(k);if(r&&r.value){const o=JSON.parse(r.value);S=Object.assign(S,o);S.plan=Object.assign({on:false,days:[1,2,3,4,5],hour:19,min:0,minutes:10,perDay:1},o.plan||{});return;}}catch(e){}
+  }
+}
+const allTexts=()=>BUILTIN.concat(S.texts||[]);
+const dayKey=(d=new Date())=>d.toISOString().slice(0,10);
+function H(){const k=dayKey();if(!S.hist[k])S.hist[k]={r:0,g:0,a:0};return S.hist[k];}
+
+/* ---------- motyw ---------- */
+function applyTheme(){
+  document.body.classList.toggle("dark",S.theme==="dark");
+  document.getElementById("themebtn").innerHTML=S.theme==="dark"?IC.sun:IC.moon;
+  document.querySelector('meta[name=theme-color]').setAttribute("content",S.theme==="dark"?"#1A1A1E":"#F2F1EC");
+}
+function toggleTheme(){S.theme=S.theme==="dark"?"light":"dark";applyTheme();save();if(view==="stats")renderStats();}
+
+/* ---------- wymowa ---------- */
+const canSpeak=()=>typeof speechSynthesis!=="undefined";
+let voice=null;
+function pickVoice(){if(!canSpeak())return;const v=speechSynthesis.getVoices();voice=v.find(x=>/^en[-_]GB/i.test(x.lang))||v.find(x=>/^en[-_]US/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null;}
+if(canSpeak()){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
+function speak(text,opts={}){
+  if(!canSpeak()){toast("Wymowa niedostępna w tym widoku");return;}
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang="en-GB";u.rate=opts.rate||S.rate;
+    if(voice)u.voice=voice;
+    if(opts.onend)u.onend=opts.onend;
+    speechSynthesis.speak(u);
+  }catch(e){toast("Wymowa niedostępna w tym widoku");}
+}
+function stopSpeak(){if(canSpeak())speechSynthesis.cancel();}
+
+/* ---------- słownik ---------- */
+function forms(w){
+  w=w.toLowerCase().replace(/[''`]s$/,"").replace(/[^a-z'-]/g,"");
+  const c=[w];
+  if(w.endsWith("ies"))c.push(w.slice(0,-3)+"y");
+  if(w.endsWith("es"))c.push(w.slice(0,-2),w.slice(0,-1));
+  if(w.endsWith("s"))c.push(w.slice(0,-1));
+  if(w.endsWith("ed")){c.push(w.slice(0,-2),w.slice(0,-1));if(w.length>4&&w[w.length-3]===w[w.length-4])c.push(w.slice(0,-3));}
+  if(w.endsWith("ing")){c.push(w.slice(0,-3),w.slice(0,-3)+"e");if(w.length>5&&w[w.length-4]===w[w.length-5])c.push(w.slice(0,-4));}
+  if(w.endsWith("ly"))c.push(w.slice(0,-2));
+  if(w.endsWith("ily"))c.push(w.slice(0,-3)+"y");
+  if(w.endsWith("er"))c.push(w.slice(0,-2),w.slice(0,-1));
+  if(w.endsWith("est"))c.push(w.slice(0,-3),w.slice(0,-2));
+  if(w.endsWith("ier"))c.push(w.slice(0,-3)+"y");
+  if(w.endsWith("ness"))c.push(w.slice(0,-4));
+  return c;
+}
+function offline(w){for(const f of forms(w))if(DICT[f])return{base:f,pl:DICT[f]};return null;}
+
+/* słowa spoza listy 3000 (nazwy własne w środku zdania są dozwolone) */
+function outsideList(text){
+  const bad=new Set();
+  text.split(/(?<=[.!?])\s+|\n+/).forEach(sent=>{
+    const toks=sent.match(/[A-Za-z][A-Za-z'-]*/g)||[];
+    toks.forEach((w,i)=>{
+      if(offline(w))return;
+      if(i>0&&/^[A-Z]/.test(w))return;
+      bad.add(w.toLowerCase());
+    });
+  });
+  return [...bad];
+}
+
+async function claude(prompt){
+  const inArtifact=!!window.storage&&!window.Capacitor;
+  const url="https://api.anthropic.com/v1/messages";
+  const headers={"Content-Type":"application/json"};
+  if(!inArtifact){
+    if(!S.apiKey)throw new Error("nokey");
+    headers["x-api-key"]=S.apiKey;
+    headers["anthropic-version"]="2023-06-01";
+    headers["anthropic-dangerous-direct-browser-access"]="true";
+  }
+  const r=await fetch(url,{method:"POST",headers,
+    body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
+  if(!r.ok)throw new Error("http "+r.status);
+  const d=await r.json();
+  return (d.content||[]).map(x=>x.text||"").join("").replace(/```json|```/g,"").trim();
+}
+const aiReady=()=>(!!window.storage&&!window.Capacitor)||!!S.apiKey;
+async function askAI(word,sentence){
+  const j=JSON.parse(await claude(
+`Przetłumacz angielskie słowo na polski w tym konkretnym kontekście.
+Słowo: "${word}"
+Zdanie: "${sentence}"
+Odpowiedz WYŁĄCZNIE obiektem JSON, bez markdown:
+{"base":"forma podstawowa po angielsku","pl":"tłumaczenie po polsku, max 4 wyrazy"}`));
+  if(!j.pl)throw new Error("brak");
+  return{base:(j.base||word).toLowerCase(),pl:j.pl};
+}
+
+/* ---------- nawigacja ---------- */
+let view="read",current=null;
+function go(v){
+  if(v!=="reader")stopSpeak();
+  view=v;
+  document.querySelectorAll(".view").forEach(e=>e.classList.remove("on"));
+  document.getElementById("v-"+v).classList.add("on");
+  ["read","words","review","stats"].forEach(k=>document.getElementById("n-"+k).classList.toggle("on",k===v||(v==="reader"&&k==="read")));
+  if(v==="read")renderTexts();
+  if(v==="words")renderWords();
+  if(v==="review"){renderSession();renderReview();}
+  if(v==="stats")renderStats();
+  window.scrollTo(0,0);meter();
+}
+function meter(){
+  const n=Object.keys(S.words).length,d=dueList().length;
+  document.getElementById("meter").innerHTML=`<b>${n}</b> słów<br><b>${d}</b> do powtórki`;
+  const b=document.getElementById("n-review");
+  b.querySelector(".badge")?.remove();
+  if(d>0){const s=document.createElement("span");s.className="badge";s.textContent=d;b.appendChild(s);}
+}
+
+/* ---------- teksty ---------- */
+function renderTexts(){
+  const el=document.getElementById("textlist");
+  el.innerHTML=`<div class="eyebrow">Teksty do czytania</div>`;
+  allTexts().forEach(t=>{
+    const b=document.createElement("button");b.className="card";
+    b.innerHTML=`<h3>${t.title}</h3><div class="meta"><span class="lvl">${t.lvl}</span>${t.body.split(/\s+/).length} słów ${S.read[t.id]?'<span class="done">· przeczytane</span>':""}</div>`;
+    b.onclick=()=>openText(t.id);el.appendChild(b);
+  });
+  const g=document.createElement("div");
+  g.innerHTML=`<div class="eyebrow" style="margin-top:26px">Nowy tekst na życzenie</div>
+    <input class="txt" id="topic" placeholder="Temat, np. koszykówka, gotowanie, praca zdalna">
+    <button class="rowbtn gen" id="genbtn">Napisz nowy tekst <small>tylko z listy 3000</small></button>
+    <div class="hint" style="margin-top:4px">${aiReady()
+      ?`Każdy nowy tekst jest sprawdzany słowo po słowie. Jeśli pojawi się cokolwiek spoza listy ${WORDLIST.length} haseł, tekst wraca do poprawki.`
+      :`Pisanie nowych tekstów wymaga klucza API — wklej go w zakładce Postępy → Ustawienia. Wbudowane teksty, wymowa i powtórki działają bez niego, offline.`}</div>`;
+  el.appendChild(g);
+  document.getElementById("genbtn").onclick=genText;
+}
+
+async function genText(){
+  if(!aiReady()){toast("Wklej klucz API w Postępy → Ustawienia");return;}
+  const topic=(document.getElementById("topic").value||"codzienne życie").trim();
+  const btn=document.getElementById("genbtn");
+  const step=(s)=>{btn.innerHTML=`${s} <span class="spin"></span>`;};
+  btn.disabled=true;step("Piszę tekst…");
+  const rules=`Wolno użyć WYŁĄCZNIE słów z tej listy (dowolne formy gramatyczne tych słów są w porządku: liczba mnoga, czasy przeszłe, -ing, stopniowanie). Imion własnych osób i miast możesz użyć swobodnie.
+LISTA: ${WORDLIST.join(" ")}`;
+  try{
+    let j=JSON.parse(await claude(
+`Napisz tekst po angielsku dla Polaka uczącego się języka (poziom B1). Temat: ${topic}
+${rules}
+Dalsze zasady: 200-240 słów, 4-5 akapitów, naturalny styl, konkretne przykłady.
+Odpowiedz WYŁĄCZNIE obiektem JSON, bez markdown:
+{"title":"angielski tytuł","text":"treść z akapitami rozdzielonymi \\n\\n"}`));
+    let bad=outsideList(j.title+". "+j.text);
+    for(let i=0;i<3&&bad.length;i++){
+      step(`Poprawiam ${bad.length} słów…`);
+      j=JSON.parse(await claude(
+`Popraw ten angielski tekst. Te słowa są spoza dozwolonej listy: ${bad.join(", ")}.
+Zastąp każde z nich prostszym słowem lub przeformułuj zdanie. Nie zmieniaj sensu ani długości.
+${rules}
+TEKST: ${j.title}\n\n${j.text}
+Odpowiedz WYŁĄCZNIE obiektem JSON: {"title":"...","text":"..."}`));
+      bad=outsideList(j.title+". "+j.text);
+    }
+    const total=(j.text.match(/[A-Za-z][A-Za-z'-]*/g)||[]).length;
+    const t={id:"g"+Date.now(),lvl:"B1",title:j.title||topic,body:j.text,cover:Math.max(0,Math.round((1-bad.length/Math.max(1,total))*1000)/10),bad:bad.length};
+    S.texts.unshift(t);save();renderTexts();openText(t.id);
+    toast(bad.length?`Gotowe — ${bad.length} słów spoza listy`:"Gotowe — 100% z listy 3000");
+  }catch(e){btn.innerHTML=`Nie udało się — spróbuj ponownie <small>ai</small>`;btn.disabled=false;}
+}
+
+/* ---------- czytnik ---------- */
+let playing=false;
+function openText(id){
+  const t=allTexts().find(x=>x.id===id);if(!t)return;
+  current=t;S.read[id]=true;save();
+  document.getElementById("r-title").textContent=t.title;
+  const badge=t.cover===undefined?`<span class="cover">100% z listy 3000</span>`:
+    (t.bad?`<span class="cover warn">${t.cover}% z listy</span>`:`<span class="cover">100% z listy 3000</span>`);
+  document.getElementById("r-sub").innerHTML=t.lvl+" · "+t.body.split(/\s+/).length+" słów "+badge;
+  const body=document.getElementById("r-body");body.innerHTML="";
+  t.body.split(/\n\s*\n/).forEach(par=>{
+    const p=document.createElement("p");
+    par.split(/(\s+)/).forEach(tok=>{
+      if(/^\s+$/.test(tok)){p.appendChild(document.createTextNode(tok));return;}
+      const m=tok.match(/^([^A-Za-z]*)([A-Za-z][A-Za-z'''-]*)([^A-Za-z]*)$/);
+      if(!m){p.appendChild(document.createTextNode(tok));return;}
+      if(m[1])p.appendChild(document.createTextNode(m[1]));
+      const s=document.createElement("span");
+      s.className="w";s.dataset.en=m[2];s.textContent=m[2];
+      const k=offline(m[2]);if(k&&S.words[k.base])s.classList.add("known");
+      s.onclick=()=>tapWord(s,par);
+      p.appendChild(s);
+      if(m[3])p.appendChild(document.createTextNode(m[3]));
+    });
+    body.appendChild(p);
+  });
+  playing=false;drawPlaybar();go("reader");
+}
+function drawPlaybar(){
+  const p=document.getElementById("playbtn"),s=document.getElementById("slowbtn");
+  p.innerHTML=(playing?IC.stop:IC.play)+(playing?"Zatrzymaj":"Odsłuchaj tekst");
+  p.classList.toggle("act",playing);
+  s.innerHTML=IC.speaker+(S.rate<.8?"Tempo wolne":"Tempo normalne");
+  s.classList.toggle("act",S.rate<.8);
+  p.onclick=()=>{if(playing){stopSpeak();playing=false;drawPlaybar();}else{playing=true;drawPlaybar();speak(current.body,{onend:()=>{playing=false;drawPlaybar();}});}};
+  s.onclick=()=>{S.rate=S.rate<.8?.92:.68;save();drawPlaybar();if(playing)speak(current.body,{onend:()=>{playing=false;drawPlaybar();}});};
+}
+function sentenceOf(par,word){
+  const parts=par.split(/(?<=[.!?])\s+/);
+  const hit=parts.find(x=>new RegExp("\\b"+word.replace(/[^A-Za-z']/g,"")+"\\b","i").test(x));
+  return(hit||par).slice(0,240);
+}
+async function tapWord(el,par){
+  const en=el.dataset.en;
+  if(S.speakTap)speak(en);
+  if(el.classList.contains("pl")){el.classList.remove("pl");el.textContent=en;return;}
+  if(el.dataset.pl){reveal(el);return;}
+  const off=offline(en);
+  if(off){el.dataset.pl=off.pl;reveal(el);addWord(off.base,off.pl,sentenceOf(par,en),en);return;}
+  el.classList.add("loading");
+  try{
+    const ai=await askAI(en,sentenceOf(par,en));
+    DICT[ai.base]=ai.pl;el.dataset.pl=ai.pl;el.classList.remove("loading");reveal(el);
+    addWord(ai.base,ai.pl,sentenceOf(par,en),en);
+  }catch(e){el.classList.remove("loading");toast("Brak tłumaczenia offline — połącz się z siecią");}
+}
+function reveal(el){el.textContent=el.dataset.pl;el.classList.add("pl");}
+function addWord(base,pl,ctx,seen){
+  if(S.words[base]){toast(`Już zapisane: <i>${base}</i>`);return;}
+  S.words[base]={pl,ctx,seen,due:Date.now(),ivl:0,ease:2.5,reps:0,added:Date.now()};
+  H().a++;save();meter();toast(`Do nauki: <i>${base}</i> → ${pl}`);
+}
+
+/* ---------- słowa ---------- */
+function renderWords(){
+  const el=document.getElementById("wordlist");
+  const ks=Object.keys(S.words).sort((a,b)=>S.words[b].added-S.words[a].added);
+  if(!ks.length){el.innerHTML=`<div class="empty"><b>Jeszcze pusto</b>Otwórz dowolny tekst i dotknij słowa, którego nie znasz. Wyląduje tutaj.</div>`;return;}
+  el.innerHTML="";
+  ks.forEach(k=>{
+    const w=S.words[k],left=w.due-Date.now();
+    const label=left<=0?"do powtórki":left<864e5?"za "+Math.max(1,Math.round(left/36e5))+" godz.":"za "+Math.round(left/864e5)+" dni";
+    const row=document.createElement("div");row.className="wrow";
+    row.innerHTML=`<button class="iconbtn" aria-label="Posłuchaj">${IC.speaker}</button>
+      <div class="col"><div class="en">${k}</div><div class="pl">${w.pl}</div></div>
+      <div class="due ${left<=0?"now":""}">${label}</div>
+      <button class="iconbtn del" aria-label="Usuń">✕</button>`;
+    row.querySelector(".iconbtn").onclick=()=>speak(k);
+    row.querySelector(".del").onclick=()=>{delete S.words[k];save();renderWords();meter();};
+    el.appendChild(row);
+  });
+}
+
+/* ---------- sesja z timerem ---------- */
+let sesEnd=null,sesCount=0,sesGood=0,tick=null;
+const dailyGoal=()=>Math.max(5,Math.round(S.plan.minutes*6*S.plan.perDay));
+function startSession(){
+  sesEnd=Date.now()+S.plan.minutes*6e4;sesCount=0;sesGood=0;
+  clearInterval(tick);tick=setInterval(()=>{
+    if(!sesEnd)return;
+    if(Date.now()>=sesEnd)return endSession(true);
+    if(view==="review")renderSession();
+  },1000);
+  renderSession();renderReview();
+}
+function endSession(auto){
+  clearInterval(tick);tick=null;sesEnd=null;
+  const acc=sesCount?Math.round(sesGood/sesCount*100):0;
+  renderSession();
+  if(auto)speak("Time is up. Good job.");
+  document.getElementById("reviewbox").innerHTML=
+    `<div class="empty"><b>Sesja skończona</b>Fiszek: ${sesCount} · trafnych: ${acc}%<br>Powtórzone dziś: ${S.reviewedToday} z celu ${dailyGoal()}.</div>
+     <button class="rowbtn gen" style="margin-top:10px" onclick="startSession()">Jeszcze jedna sesja <small>${S.plan.minutes} min</small></button>
+     <button class="rowbtn" onclick="renderReview()">Ucz się dalej bez timera <small>swobodnie</small></button>`;
+}
+function renderSession(){
+  const box=document.getElementById("sessionbox");
+  const done=S.reviewedToday,goal=dailyGoal();
+  if(sesEnd){
+    const left=Math.max(0,sesEnd-Date.now());
+    const mm=String(Math.floor(left/6e4)).padStart(2,"0"),ss=String(Math.floor(left%6e4/1000)).padStart(2,"0");
+    box.innerHTML=`<div class="sessionbar"><div><div class="clock">${mm}:${ss}</div><div class="lab">fiszek w sesji: ${sesCount}</div></div>
+      <button onclick="endSession(false)">Zakończ sesję</button></div>
+      <div class="prog"><i style="width:${Math.min(100,100-left/(S.plan.minutes*6e4)*100)}%"></i></div>`;
+  }else{
+    box.innerHTML=`<div class="sessionbar"><div><div class="clock">${done}/${goal}</div><div class="lab">dzisiejszy cel</div></div>
+      <button class="go" onclick="startSession()">Sesja ${S.plan.minutes} min</button></div>
+      <div class="prog"><i style="width:${Math.min(100,done/goal*100)}%"></i></div>`;
+  }
+}
+
+/* ---------- powtórki ---------- */
+function dueList(){const n=Date.now();return Object.keys(S.words).filter(k=>S.words[k].due<=n);}
+let card=null,shown=false;
+function renderReview(){
+  const box=document.getElementById("reviewbox");
+  if(S.lastReviewDay!==dayKey()){S.lastReviewDay=dayKey();S.reviewedToday=0;}
+  const d=dueList();
+  if(!d.length){
+    const total=Object.keys(S.words).length;
+    box.innerHTML=`<div class="empty"><b>${total?"Na dziś koniec":"Brak słów"}</b>${total?`Powtórzone dziś: ${S.reviewedToday}. Wróć jutro albo poczytaj kolejny tekst.`:"Zbierz kilka słów podczas czytania, a pojawią się tu fiszki."}</div>`;return;
+  }
+  card=d[Math.floor(Math.random()*d.length)];shown=false;
+  const w=S.words[card];
+  const ctx=(w.ctx||"").replace(new RegExp("\\b("+(w.seen||card)+")\\b","i"),"<em>$1</em>");
+  box.innerHTML=`<div class="slip">
+      <div class="en"><span>${card}</span><button class="iconbtn" id="say" aria-label="Posłuchaj">${IC.speaker}</button></div>
+      <div id="answer"></div>
+    </div>
+    <button class="reveal" id="rev">Pokaż tłumaczenie</button>
+    <div class="hint" style="margin-top:14px">Zostało dziś: ${d.length}. Powtórzone: ${S.reviewedToday}.</div>`;
+  document.getElementById("say").onclick=()=>speak(card);
+  document.getElementById("rev").onclick=()=>{
+    if(shown)return;shown=true;speak(card);
+    document.getElementById("answer").innerHTML=`<div class="pl">${w.pl}</div>${w.ctx?`<div class="ctx">${ctx}</div>`:""}`;
+    document.getElementById("rev").outerHTML=`<div class="grades">
+      <button class="grade g1" onclick="grade(1)"><b>Znowu</b><span>&lt;10 min</span></button>
+      <button class="grade g2" onclick="grade(2)"><b>Trudne</b><span>${prev(2)}</span></button>
+      <button class="grade g3" onclick="grade(3)"><b>Dobre</b><span>${prev(3)}</span></button>
+      <button class="grade g4" onclick="grade(4)"><b>Łatwe</b><span>${prev(4)}</span></button></div>`;
+  };
+}
+function nextIvl(w,g){
+  if(g===1)return 0;
+  if(g===2)return w.reps?Math.max(1,Math.round(w.ivl*1.2)):1;
+  if(g===3)return w.reps===0?1:(w.reps===1?3:Math.round(w.ivl*w.ease));
+  return w.reps===0?3:Math.max(4,Math.round(w.ivl*w.ease*1.3));
+}
+function prev(g){const i=nextIvl(S.words[card],g);return i<1?"10 min":i+(i===1?" dzień":" dni");}
+function grade(g){
+  const w=S.words[card],h=H();
+  if(g===1){w.reps=0;w.ease=Math.max(1.3,w.ease-.2);w.ivl=0;w.due=Date.now()+6e5;}
+  else{
+    if(g===2)w.ease=Math.max(1.3,w.ease-.15);
+    if(g===4)w.ease=Math.min(3.2,w.ease+.1);
+    w.ivl=nextIvl(w,g);w.reps++;w.due=Date.now()+w.ivl*864e5;h.g++;if(sesEnd)sesGood++;
+  }
+  h.r++;S.reviewedToday++;if(sesEnd)sesCount++;
+  save();meter();renderSession();renderReview();
+}
+
+/* ---------- przypomnienia ---------- */
+const DN=["nd","pn","wt","śr","cz","pt","sb"];
+const LN=()=>CAP().LocalNotifications;
+function slots(){
+  const out=[];
+  for(let i=0;i<S.plan.perDay;i++)out.push([(S.plan.hour+i*4)%24,S.plan.min]);
+  return out;
+}
+/* W apce: prawdziwe powtarzalne powiadomienia systemowe (działają przy zablokowanym telefonie).
+   W przeglądarce: Notification API przy otwartej stronie. */
+async function scheduleAll(){
+  const N=LN();
+  if(!N)return;
+  try{
+    const old=await N.getPending();
+    if(old.notifications&&old.notifications.length)await N.cancel({notifications:old.notifications});
+    if(!S.plan.on||!S.plan.days.length)return;
+    const list=[];let id=1;
+    S.plan.days.forEach(d=>slots().forEach(([h,m])=>{
+      list.push({id:id++,title:"Czytaj & Ucz się",
+        body:`Czas na angielski — sesja ${S.plan.minutes} min`,
+        schedule:{on:{weekday:d+1,hour:h,minute:m},allowWhileIdle:true,repeats:true},
+        smallIcon:"ic_stat_icon"});
+    }));
+    if(list.length)await N.schedule({notifications:list});
+  }catch(e){console.log("harmonogram",e);}
+}
+async function togglePlan(){
+  if(!S.plan.on){
+    const N=LN();
+    if(N){try{const p=await N.requestPermissions();if(p.display!=="granted")toast("Włącz powiadomienia w ustawieniach telefonu");}catch(e){}}
+    else if(typeof Notification!=="undefined"){
+      try{const p=await Notification.requestPermission();if(p!=="granted")toast("Bez zgody pokażę przypomnienie tylko w aplikacji");}catch(e){}
+    }else toast("Przypomnienia zadziałają tylko przy otwartej aplikacji");
+  }
+  S.plan.on=!S.plan.on;save();await scheduleAll();renderStats();
+}
+function fire(){
+  const msg=`Czas na angielski — ${S.plan.minutes} min, ${dueList().length} fiszek czeka`;
+  const N=LN();
+  if(N){N.schedule({notifications:[{id:999,title:"Czytaj & Ucz się",body:msg,schedule:{at:new Date(Date.now()+3000)}}]}).catch(()=>toast(msg));toast("Powiadomienie za 3 sekundy");return;}
+  try{
+    if(typeof Notification!=="undefined"&&Notification.permission==="granted")new Notification("Czytaj & Ucz się",{body:msg});
+    else toast(msg);
+  }catch(e){toast(msg);}
+}
+setInterval(()=>{
+  if(!S.plan.on||LN())return;
+  const now=new Date();
+  if(!S.plan.days.includes(now.getDay()))return;
+  const stamp=dayKey()+" "+now.getHours()+":"+now.getMinutes();
+  if(S.lastNotify===stamp)return;
+  if(slots().some(([h,m])=>h===now.getHours()&&m===now.getMinutes())){S.lastNotify=stamp;save();fire();}
+},20000);
+
+/* ---------- statystyki + ustawienia ---------- */
+function streak(){
+  let n=0,d=new Date();
+  if(!(S.hist[dayKey(d)]||{}).r)d.setDate(d.getDate()-1);
+  while((S.hist[dayKey(d)]||{}).r>0){n++;d.setDate(d.getDate()-1);}
+  return n;
+}
+const pct=(a,b)=>b?Math.round(a/b*100):0;
+function renderStats(){
+  const ks=Object.keys(S.words),now=Date.now();
+  const nowe=ks.filter(k=>S.words[k].reps===0).length;
+  const ucze=ks.filter(k=>S.words[k].reps>0&&S.words[k].ivl<21).length;
+  const umiem=ks.filter(k=>S.words[k].ivl>=21).length;
+  const due=ks.filter(k=>S.words[k].due<=now).length;
+  const days=[];for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push([d,S.hist[dayKey(d)]||{r:0,g:0,a:0}]);}
+  const max=Math.max(1,...days.map(x=>x[1].r));
+  const totR=Object.values(S.hist).reduce((a,b)=>a+(b.r||0),0);
+  const totG=Object.values(S.hist).reduce((a,b)=>a+(b.g||0),0);
+  const week=days.slice(7).reduce((a,b)=>a+(b[1].a||0),0);
+  const read=allTexts().filter(t=>S.read[t.id]).length;
+  const dn=["N","P","W","Ś","C","P","S"];
+  const p=S.plan;
+
+  document.getElementById("statsbox").innerHTML=`
+  <div class="eyebrow">Twoje postępy</div>
+  <div class="tiles">
+    <div class="tile"><div class="num">${ks.length}</div><div class="lab">zebrane słowa</div></div>
+    <div class="tile mintc"><div class="num">${umiem}</div><div class="lab">umiem (21+ dni)</div></div>
+    <div class="tile accent"><div class="num">${streak()}</div><div class="lab">dni serii</div></div>
+    <div class="tile"><div class="num">${due}</div><div class="lab">czeka na powtórkę</div></div>
+  </div>
+
+  <div class="eyebrow" style="margin-top:26px">Powtórki — ostatnie 14 dni</div>
+  <div class="chart">${days.map(([d,h])=>`<div class="bar ${h.r?"":"zero"}" style="height:${h.r?Math.round(h.r/max*100):2}%">${h.r?`<b>${h.r}</b>`:""}</div>`).join("")}</div>
+  <div class="axis">${days.map(([d])=>`<span>${dn[d.getDay()]}</span>`).join("")}</div>
+
+  <div class="eyebrow" style="margin-top:26px">Stan słownika</div>
+  <div class="mix">
+    <i style="width:${pct(nowe,ks.length)}%;background:var(--marker-deep)"></i>
+    <i style="width:${pct(ucze,ks.length)}%;background:var(--atrament)"></i>
+    <i style="width:${pct(umiem,ks.length)}%;background:var(--mint)"></i>
+  </div>
+  <div class="legend">
+    <span><i style="background:var(--marker-deep)"></i>nowe ${nowe}</span>
+    <span><i style="background:var(--atrament)"></i>uczę się ${ucze}</span>
+    <span><i style="background:var(--mint)"></i>umiem ${umiem}</span>
+  </div>
+  <div class="tiles" style="margin-top:16px">
+    <div class="tile"><div class="num">${pct(totG,totR)}%</div><div class="lab">trafnych odpowiedzi</div></div>
+    <div class="tile"><div class="num">${totR}</div><div class="lab">wszystkich powtórek</div></div>
+    <div class="tile"><div class="num">${week}</div><div class="lab">nowych słów w tydzień</div></div>
+    <div class="tile"><div class="num">${read}</div><div class="lab">przeczytanych tekstów</div></div>
+  </div>
+
+  <div class="eyebrow" style="margin-top:26px">Plan nauki</div>
+  <button class="rowbtn" onclick="togglePlan()">Przypomnienia o nauce <span class="sw ${p.on?"on":""}">${p.on?"włączone":"wyłączone"}</span></button>
+  <div class="lab" style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin:14px 0 6px">Dni nauki</div>
+  <div class="chips">${[1,2,3,4,5,6,0].map(d=>`<button class="chip ${p.days.includes(d)?"on":""}" onclick="toggleDay(${d})">${DN[d]}</button>`).join("")}</div>
+  <div class="field">Pierwsza sesja o<input type="time" value="${String(p.hour).padStart(2,"0")}:${String(p.min).padStart(2,"0")}" onchange="setTime(this.value)"></div>
+  <div class="lab" style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin:14px 0 6px">Długość sesji</div>
+  <div class="opts">${[5,10,15,20,30].map(m=>`<button class="opt ${p.minutes===m?"on":""}" onclick="setMinutes(${m})">${m} min</button>`).join("")}</div>
+  <div class="lab" style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin:14px 0 6px">Sesji dziennie</div>
+  <div class="opts">${[1,2,3].map(n=>`<button class="opt ${p.perDay===n?"on":""}" onclick="setPerDay(${n})">${n}×</button>`).join("")}</div>
+  <div class="goal">Cel dzienny: <b>${dailyGoal()} fiszek</b> (${p.minutes} min × ${p.perDay})<br>
+    Przypomnienia: <b>${p.on?slots().map(([h,m])=>String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")).join(", "):"wyłączone"}</b><br>
+    Dni: <b>${p.days.length?p.days.slice().sort().map(d=>DN[d]).join(" "):"żaden"}</b></div>
+  <div class="hint">Powiadomienie systemowe dociera, gdy aplikacja jest otwarta lub w tle. Żeby przypomnienie zadziałało przy zablokowanym telefonie, ustaw dodatkowo budzik o tej samej godzinie.</div>
+
+  <div class="eyebrow" style="margin-top:26px">Ustawienia</div>
+  <button class="rowbtn" onclick="toggleTheme()">Motyw <span class="sw ${S.theme==="dark"?"on":""}">${S.theme==="dark"?"ciemny":"jasny"}</span></button>
+  <button class="rowbtn" onclick="toggleTap()">Wymowa po dotknięciu słowa <span class="sw ${S.speakTap?"on":""}">${S.speakTap?"włączona":"wyłączona"}</span></button>
+  <button class="rowbtn" onclick="toggleRate()">Tempo mowy <span class="sw ${S.rate<.8?"on":""}">${S.rate<.8?"wolne":"normalne"}</span></button>
+  <button class="rowbtn" onclick="speak('This is how the pronunciation sounds.')">Sprawdź wymowę <span class="sw">test</span></button>
+  <button class="rowbtn" onclick="fire()">Sprawdź przypomnienie <span class="sw">test</span></button>
+  <div class="lab" style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin:14px 0 6px">Klucz API (opcjonalny)</div>
+  <input class="txt" type="password" placeholder="sk-ant-… — tylko do pisania nowych tekstów" value="${S.apiKey||""}" onchange="setKey(this.value)">
+  <div class="hint" style="margin-bottom:14px">Bez klucza aplikacja działa w pełni offline: teksty wbudowane, słownik ${WORDLIST.length} haseł, wymowa, powtórki. Klucz włącza pisanie nowych tekstów i tłumaczenie słów spoza listy. Trzymany jest tylko na tym telefonie.</div>
+  <button class="rowbtn" onclick="wipe()">Usuń wszystkie dane <span class="sw">reset</span></button>
+  <div class="hint" style="margin-top:10px">Lista dozwolonych słów: ${WORDLIST.length} haseł. Teksty w aplikacji są budowane wyłącznie z nich.</div>`;
+}
+function toggleDay(d){
+  const i=S.plan.days.indexOf(d);
+  if(i<0)S.plan.days.push(d);else S.plan.days.splice(i,1);
+  save();scheduleAll();renderStats();
+}
+function setTime(v){const[h,m]=v.split(":").map(Number);S.plan.hour=h||0;S.plan.min=m||0;save();scheduleAll();renderStats();}
+function setMinutes(m){S.plan.minutes=m;save();scheduleAll();renderStats();}
+function setPerDay(n){S.plan.perDay=n;save();scheduleAll();renderStats();}
+function setKey(v){S.apiKey=v.trim();save();toast(S.apiKey?"Klucz zapisany":"Klucz usunięty");}
+function toggleTap(){S.speakTap=!S.speakTap;save();renderStats();}
+function toggleRate(){S.rate=S.rate<.8?.92:.68;save();renderStats();}
+
+/* ---------- drobiazgi ---------- */
+let tT=null;
+function toast(html){const t=document.getElementById("toast");t.innerHTML=html;t.classList.add("on");clearTimeout(tT);tT=setTimeout(()=>t.classList.remove("on"),2400);}
+async function wipe(){
+  if(!confirm("Usunąć wszystkie zebrane słowa, postępy i wygenerowane teksty?"))return;
+  const th=S.theme,pl=S.plan,ak=S.apiKey;
+  S={words:{},texts:[],read:{},hist:{},theme:th,speakTap:true,rate:.92,lastReviewDay:"",reviewedToday:0,plan:pl,lastNotify:"",apiKey:ak};
+  try{await Store.del(KEY);}catch(e){}
+  save();renderStats();meter();toast("Dane usunięte");
+}
+document.getElementById("themebtn").onclick=toggleTheme;
+
+if("serviceWorker" in navigator&&location.protocol.startsWith("http"))
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+
+(async()=>{await load();applyTheme();renderTexts();meter();scheduleAll();})();
+</script>
+</body>
+</html>
