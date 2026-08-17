@@ -1,0 +1,19 @@
+{
+  "appId": "pl.czytajucz.angielski",
+  "appName": "Czytaj i ucz się",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon",
+      "iconColor": "#2E2A82"
+    },
+    "SplashScreen": {
+      "launchShowDuration": 600,
+      "backgroundColor": "#F2F1EC",
+      "showSpinner": false
+    }
+  }
+}

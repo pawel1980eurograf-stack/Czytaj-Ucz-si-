@@ -1,0 +1,25 @@
+{
+  "name": "czytaj-i-ucz-sie",
+  "version": "1.0.0",
+  "description": "Nauka angielskiego przez czytanie — Android (Capacitor)",
+  "private": true,
+  "scripts": {
+    "android:add": "cap add android",
+    "sync": "cap sync",
+    "open": "cap open android",
+    "run": "cap run android",
+    "apk": "cd android && ./gradlew assembleDebug",
+    "apk:release": "cd android && ./gradlew assembleRelease"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/core": "^6.1.2",
+    "@capacitor/local-notifications": "^6.1.0",
+    "@capacitor/preferences": "^6.0.2",
+    "@capacitor/splash-screen": "^6.0.2",
+    "@capacitor/status-bar": "^6.0.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2"
+  }
+}
