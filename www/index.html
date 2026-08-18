@@ -7,6 +7,12 @@
 <title>Czytaj i ucz się</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Czytaj&Ucz">
+<meta name="format-detection" content="telephone=no">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -142,6 +148,18 @@ h2.title{font-family:var(--display);font-weight:800;font-size:27px;line-height:1
 .prog i{display:block;height:100%;background:var(--atrament);transition:width .3s}
 .cover{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--mint);border:1px solid var(--line);padding:2px 6px;display:inline-block;margin-left:6px}
 .cover.warn{color:var(--coral)}
+/* słowa poznane — ledwie inny odcień, żeby nie psuć czytania */
+.w.mastered{color:var(--mint);color:color-mix(in srgb,var(--mint) 52%,var(--ink))}
+.w.mastered.pl{color:var(--on-marker)}
+.seg{display:flex;gap:0;margin:2px 0 14px;border:1px solid var(--line)}
+.seg button{flex:1;padding:10px 6px;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);background:var(--paper-2)}
+.seg button.on{background:var(--atrament);color:var(--paper)}
+.bigbar{height:10px;background:var(--line);margin:10px 0 6px;overflow:hidden}
+.bigbar i{display:block;height:100%;background:var(--mint);transition:width .5s ease}
+.bigcount{font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:-.03em;line-height:1}
+.bigcount span{font-size:16px;color:var(--ink-soft);font-weight:600}
+.knownbox{border:1px solid var(--line);background:var(--paper-2);padding:16px}
+.mark{border:1px solid var(--line);padding:8px 12px;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mint)}
 nav{position:fixed;bottom:0;left:0;right:0;z-index:30;display:grid;grid-template-columns:repeat(4,1fr);
   background:var(--paper-2);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);max-width:720px;margin:0 auto}
 nav button{padding:10px 2px 12px;font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);position:relative}
@@ -187,7 +205,7 @@ input.txt{width:100%;border:1px solid var(--line);background:var(--paper-2);padd
         <button id="playbtn"></button>
         <button id="slowbtn"></button>
       </div>
-      <div class="hint">Dotknij słowa, którego nie znasz — zamieni się na polskie i trafi do zakładki Słowa. Dotknij ponownie, żeby wrócić do angielskiego.</div>
+      <div class="hint">Dotknij słowa, którego nie znasz — zamieni się na polskie i trafi do zakładki Słowa.<br>Przytrzymaj palec na słowie, które już znasz — zzielenieje i doliczy się do poznanych.</div>
       <div class="prose" id="r-body"></div>
     </section>
 
@@ -767,13 +785,13 @@ const Store={
   }
 };
 
-let S={words:{},texts:[],read:{},hist:{},theme:"light",speakTap:true,rate:.92,lastReviewDay:"",reviewedToday:0,
+let S={words:{},texts:[],read:{},hist:{},known:{},theme:"light",speakTap:true,rate:.92,lastReviewDay:"",reviewedToday:0,
   plan:{on:false,days:[1,2,3,4,5],hour:19,min:0,minutes:10,perDay:1},lastNotify:"",apiKey:""};
 let saveT=null;
 function save(){clearTimeout(saveT);saveT=setTimeout(async()=>{try{await Store.set(KEY,JSON.stringify(S));}catch(e){}},350);}
 async function load(){
   for(const k of [KEY,"czytaj-ucz-sie:v2","czytaj-ucz-sie:v1"]){
-    try{const r=await Store.get(k);if(r&&r.value){const o=JSON.parse(r.value);S=Object.assign(S,o);S.plan=Object.assign({on:false,days:[1,2,3,4,5],hour:19,min:0,minutes:10,perDay:1},o.plan||{});return;}}catch(e){}
+    try{const r=await Store.get(k);if(r&&r.value){const o=JSON.parse(r.value);S=Object.assign(S,o);S.known=S.known||{};S.plan=Object.assign({on:false,days:[1,2,3,4,5],hour:19,min:0,minutes:10,perDay:1},o.plan||{});return;}}catch(e){}
   }
 }
 const allTexts=()=>BUILTIN.concat(S.texts||[]);
@@ -790,21 +808,63 @@ function toggleTheme(){S.theme=S.theme==="dark"?"light":"dark";applyTheme();save
 
 /* ---------- wymowa ---------- */
 const canSpeak=()=>typeof speechSynthesis!=="undefined";
-let voice=null;
-function pickVoice(){if(!canSpeak())return;const v=speechSynthesis.getVoices();voice=v.find(x=>/^en[-_]GB/i.test(x.lang))||v.find(x=>/^en[-_]US/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null;}
-if(canSpeak()){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
+const TTS=()=>CAP().TextToSpeech;
+let voice=null,voicesReady=false;
+function pickVoice(){
+  if(!canSpeak())return;
+  const v=speechSynthesis.getVoices()||[];
+  if(!v.length)return;
+  voicesReady=true;
+  voice=v.find(x=>/^en[-_]GB/i.test(x.lang))||v.find(x=>/^en[-_]US/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null;
+}
+if(canSpeak()){
+  pickVoice();
+  speechSynthesis.onvoiceschanged=pickVoice;
+  /* WebView na Androidzie zwraca głosy z opóźnieniem — dopytujemy kilka razy */
+  let tries=0;const t=setInterval(()=>{pickVoice();if(voicesReady||++tries>20)clearInterval(t);},300);
+}
 function speak(text,opts={}){
-  if(!canSpeak()){toast("Wymowa niedostępna w tym widoku");return;}
+  const N=TTS();
+  if(N){ /* w apce: natywny silnik Androida/iOS, najpewniejsza droga */
+    N.speak({text,lang:"en-GB",rate:opts.rate||S.rate,pitch:1})
+      .then(()=>{if(opts.onend)opts.onend();})
+      .catch(()=>webSpeak(text,opts));
+    return;
+  }
+  webSpeak(text,opts);
+}
+function webSpeak(text,opts={}){
+  if(!canSpeak()){toast("Ten telefon nie ma silnika mowy — zainstaluj „Usługi mowy od Google”");return;}
   try{
     speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(text);
-    u.lang="en-GB";u.rate=opts.rate||S.rate;
+    u.lang=(voice&&voice.lang)||"en-US";
+    u.rate=opts.rate||S.rate;
     if(voice)u.voice=voice;
-    if(opts.onend)u.onend=opts.onend;
+    u.onend=()=>{if(opts.onend)opts.onend();};
+    u.onerror=(e)=>{
+      if(e&&(e.error==="interrupted"||e.error==="canceled"))return;
+      toast("Silnik mowy odmówił — sprawdź Ustawienia → Zamiana tekstu na mowę");
+    };
     speechSynthesis.speak(u);
-  }catch(e){toast("Wymowa niedostępna w tym widoku");}
+    /* niektóre WebView milczą, dopóki nie ruszy się kolejka */
+    setTimeout(()=>{try{if(speechSynthesis.paused)speechSynthesis.resume();}catch(e){}},250);
+  }catch(e){toast("Nie udało się uruchomić wymowy: "+(e&&e.message||"błąd"));}
 }
-function stopSpeak(){if(canSpeak())speechSynthesis.cancel();}
+function stopSpeak(){
+  const N=TTS();
+  if(N){N.stop().catch(()=>{});return;}
+  if(canSpeak())try{speechSynthesis.cancel();}catch(e){}
+}
+/* diagnostyka: co telefon naprawdę ma */
+function speechInfo(){
+  const N=TTS();
+  if(N){toast("Silnik natywny aktywny — wymowa powinna działać");return;}
+  if(!canSpeak()){toast("Brak Web Speech API w tym widoku");return;}
+  const v=speechSynthesis.getVoices()||[];
+  const en=v.filter(x=>/^en/i.test(x.lang));
+  toast(v.length?`Głosów: ${v.length}, angielskich: ${en.length}${en.length?" — "+en[0].name:" (pobierz angielski w ustawieniach TTS)"}`:"Telefon nie zgłasza żadnych głosów — sprawdź ustawienia TTS");
+}
 
 /* ---------- słownik ---------- */
 function forms(w){
@@ -882,8 +942,8 @@ function go(v){
   window.scrollTo(0,0);meter();
 }
 function meter(){
-  const n=Object.keys(S.words).length,d=dueList().length;
-  document.getElementById("meter").innerHTML=`<b>${n}</b> słów<br><b>${d}</b> do powtórki`;
+  const n=Object.keys(S.words).length,d=dueList().length,kn=Object.keys(S.known).length;
+  document.getElementById("meter").innerHTML=`<b>${kn}</b> poznanych słów<br><b>${d}</b> do powtórki${n?` · uczysz się ${n}`:""}`;
   const b=document.getElementById("n-review");
   b.querySelector(".badge")?.remove();
   if(d>0){const s=document.createElement("span");s.className="badge";s.textContent=d;b.appendChild(s);}
@@ -961,8 +1021,10 @@ function openText(id){
       if(m[1])p.appendChild(document.createTextNode(m[1]));
       const s=document.createElement("span");
       s.className="w";s.dataset.en=m[2];s.textContent=m[2];
-      const k=offline(m[2]);if(k&&S.words[k.base])s.classList.add("known");
-      s.onclick=()=>tapWord(s,par);
+      const k=offline(m[2]);
+      if(k&&S.known[k.base])s.classList.add("mastered");
+      else if(k&&S.words[k.base])s.classList.add("known");
+      bindWord(s,par);
       p.appendChild(s);
       if(m[3])p.appendChild(document.createTextNode(m[3]));
     });
@@ -978,6 +1040,35 @@ function drawPlaybar(){
   s.classList.toggle("act",S.rate<.8);
   p.onclick=()=>{if(playing){stopSpeak();playing=false;drawPlaybar();}else{playing=true;drawPlaybar();speak(current.body,{onend:()=>{playing=false;drawPlaybar();}});}};
   s.onclick=()=>{S.rate=S.rate<.8?.92:.68;save();drawPlaybar();if(playing)speak(current.body,{onend:()=>{playing=false;drawPlaybar();}});};
+}
+/* krótkie dotknięcie = tłumacz, przytrzymanie = oznacz jako poznane */
+function bindWord(el,par){
+  let timer=null,long=false;
+  const start=()=>{long=false;timer=setTimeout(()=>{long=true;toggleKnown(el);},480);};
+  const cancel=()=>{clearTimeout(timer);};
+  el.addEventListener("touchstart",start,{passive:true});
+  el.addEventListener("touchend",cancel);
+  el.addEventListener("touchmove",cancel,{passive:true});
+  el.addEventListener("mousedown",start);
+  el.addEventListener("mouseup",cancel);
+  el.addEventListener("mouseleave",cancel);
+  el.addEventListener("contextmenu",e=>e.preventDefault());
+  el.onclick=()=>{if(long){long=false;return;}tapWord(el,par);};
+}
+function baseOf(w){const o=offline(w);return o?o.base:w.toLowerCase().replace(/[^a-z'-]/g,"");}
+function toggleKnown(el){
+  const en=el.dataset.en,b=baseOf(en);
+  if(S.known[b]){
+    delete S.known[b];el.classList.remove("mastered");
+    toast(`<i>${b}</i> — z powrotem do nauki`);
+  }else{
+    S.known[b]=Date.now();
+    delete S.words[b];
+    el.classList.add("mastered");el.classList.remove("known");
+    if(el.classList.contains("pl")){el.classList.remove("pl");el.textContent=en;}
+    toast(`Znam: <i>${b}</i> — poznanych ${Object.keys(S.known).length}`);
+  }
+  save();meter();
 }
 function sentenceOf(par,word){
   const parts=par.split(/(?<=[.!?])\s+/);
@@ -1000,27 +1091,54 @@ async function tapWord(el,par){
 }
 function reveal(el){el.textContent=el.dataset.pl;el.classList.add("pl");}
 function addWord(base,pl,ctx,seen){
+  if(S.known[base])return;
   if(S.words[base]){toast(`Już zapisane: <i>${base}</i>`);return;}
   S.words[base]={pl,ctx,seen,due:Date.now(),ivl:0,ease:2.5,reps:0,added:Date.now()};
   H().a++;save();meter();toast(`Do nauki: <i>${base}</i> → ${pl}`);
 }
 
 /* ---------- słowa ---------- */
+let wordsTab="learn";
+function setWordsTab(t){wordsTab=t;renderWords();}
+function markKnown(k){
+  S.known[k]=Date.now();delete S.words[k];save();meter();renderWords();
+  toast(`Znam: <i>${k}</i> — poznanych ${Object.keys(S.known).length}`);
+}
+function unmarkKnown(k){delete S.known[k];save();meter();renderWords();toast(`<i>${k}</i> wróciło do nauki`);}
 function renderWords(){
   const el=document.getElementById("wordlist");
-  const ks=Object.keys(S.words).sort((a,b)=>S.words[b].added-S.words[a].added);
-  if(!ks.length){el.innerHTML=`<div class="empty"><b>Jeszcze pusto</b>Otwórz dowolny tekst i dotknij słowa, którego nie znasz. Wyląduje tutaj.</div>`;return;}
-  el.innerHTML="";
-  ks.forEach(k=>{
-    const w=S.words[k],left=w.due-Date.now();
-    const label=left<=0?"do powtórki":left<864e5?"za "+Math.max(1,Math.round(left/36e5))+" godz.":"za "+Math.round(left/864e5)+" dni";
+  const learn=Object.keys(S.words).sort((a,b)=>S.words[b].added-S.words[a].added);
+  const kn=Object.keys(S.known).sort((a,b)=>S.known[b]-S.known[a]);
+  let html=`<div class="seg">
+    <button class="${wordsTab==="learn"?"on":""}" onclick="setWordsTab('learn')">Do nauki ${learn.length}</button>
+    <button class="${wordsTab==="known"?"on":""}" onclick="setWordsTab('known')">Poznane ${kn.length}</button></div>`;
+  el.innerHTML=html;
+  const list=wordsTab==="learn"?learn:kn;
+  if(!list.length){
+    el.innerHTML+=wordsTab==="learn"
+      ?`<div class="empty"><b>Jeszcze pusto</b>Otwórz dowolny tekst i dotknij słowa, którego nie znasz. Wyląduje tutaj.</div>`
+      :`<div class="empty"><b>Brak poznanych słów</b>W tekście przytrzymaj palec na słowie, które już znasz — trafi tutaj i zacznie się liczyć do celu 3000.</div>`;
+    return;
+  }
+  list.forEach(k=>{
     const row=document.createElement("div");row.className="wrow";
-    row.innerHTML=`<button class="iconbtn" aria-label="Posłuchaj">${IC.speaker}</button>
-      <div class="col"><div class="en">${k}</div><div class="pl">${w.pl}</div></div>
-      <div class="due ${left<=0?"now":""}">${label}</div>
-      <button class="iconbtn del" aria-label="Usuń">✕</button>`;
-    row.querySelector(".iconbtn").onclick=()=>speak(k);
-    row.querySelector(".del").onclick=()=>{delete S.words[k];save();renderWords();meter();};
+    if(wordsTab==="learn"){
+      const w=S.words[k],left=w.due-Date.now();
+      const label=left<=0?"do powtórki":left<864e5?"za "+Math.max(1,Math.round(left/36e5))+" godz.":"za "+Math.round(left/864e5)+" dni";
+      row.innerHTML=`<button class="iconbtn say" aria-label="Posłuchaj">${IC.speaker}</button>
+        <div class="col"><div class="en">${k}</div><div class="pl">${w.pl}</div></div>
+        <div class="due ${left<=0?"now":""}">${label}</div>
+        <button class="iconbtn ok" aria-label="Już znam">✓</button>
+        <button class="iconbtn del" aria-label="Usuń">✕</button>`;
+      row.querySelector(".ok").onclick=()=>markKnown(k);
+      row.querySelector(".del").onclick=()=>{delete S.words[k];save();renderWords();meter();};
+    }else{
+      row.innerHTML=`<button class="iconbtn say" aria-label="Posłuchaj">${IC.speaker}</button>
+        <div class="col"><div class="en">${k}</div><div class="pl">${DICT[k]||""}</div></div>
+        <button class="iconbtn del" aria-label="Wróć do nauki">↺</button>`;
+      row.querySelector(".del").onclick=()=>unmarkKnown(k);
+    }
+    row.querySelector(".say").onclick=()=>speak(k);
     el.appendChild(row);
   });
 }
@@ -1082,8 +1200,10 @@ function renderReview(){
       <div id="answer"></div>
     </div>
     <button class="reveal" id="rev">Pokaż tłumaczenie</button>
-    <div class="hint" style="margin-top:14px">Zostało dziś: ${d.length}. Powtórzone: ${S.reviewedToday}.</div>`;
+    <button class="rowbtn" id="knowit" style="margin-top:8px;justify-content:center;color:var(--mint)">Znam to na pamięć — przenieś do poznanych</button>
+    <div class="hint" style="margin-top:6px">Zostało dziś: ${d.length}. Powtórzone: ${S.reviewedToday}.</div>`;
   document.getElementById("say").onclick=()=>speak(card);
+  document.getElementById("knowit").onclick=()=>{markKnown(card);renderSession();renderReview();};
   document.getElementById("rev").onclick=()=>{
     if(shown)return;shown=true;speak(card);
     document.getElementById("answer").innerHTML=`<div class="pl">${w.pl}</div>${w.ctx?`<div class="ctx">${ctx}</div>`:""}`;
@@ -1108,6 +1228,7 @@ function grade(g){
     if(g===2)w.ease=Math.max(1.3,w.ease-.15);
     if(g===4)w.ease=Math.min(3.2,w.ease+.1);
     w.ivl=nextIvl(w,g);w.reps++;w.due=Date.now()+w.ivl*864e5;h.g++;if(sesEnd)sesGood++;
+    if(w.ivl>=90){S.known[card]=Date.now();delete S.words[card];toast(`<i>${card}</i> uznane za poznane — ${Object.keys(S.known).length} z ${WORDLIST.length}`);}
   }
   h.r++;S.reviewedToday++;if(sesEnd)sesCount++;
   save();meter();renderSession();renderReview();
@@ -1192,7 +1313,16 @@ function renderStats(){
   const p=S.plan;
 
   document.getElementById("statsbox").innerHTML=`
-  <div class="eyebrow">Twoje postępy</div>
+  <div class="eyebrow">Poznane słowa</div>
+  <div class="knownbox">
+    <div class="bigcount">${Object.keys(S.known).length} <span>z ${WORDLIST.length}</span></div>
+    <div class="bigbar"><i style="width:${Math.min(100,Object.keys(S.known).length/WORDLIST.length*100)}%"></i></div>
+    <div class="lab" style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)">
+      ${(Object.keys(S.known).length/WORDLIST.length*100).toFixed(1)}% listy · w tym tygodniu ${Object.values(S.known).filter(t=>t>Date.now()-6048e5).length}</div>
+  </div>
+  <div class="hint" style="margin-top:10px">Przytrzymaj palec na słowie w tekście, żeby dorzucić je tutaj. Słowo powtarzane skutecznie przez 3 miesiące trafia tu samo.</div>
+
+  <div class="eyebrow" style="margin-top:26px">Twoje postępy</div>
   <div class="tiles">
     <div class="tile"><div class="num">${ks.length}</div><div class="lab">zebrane słowa</div></div>
     <div class="tile mintc"><div class="num">${umiem}</div><div class="lab">umiem (21+ dni)</div></div>
@@ -1236,11 +1366,18 @@ function renderStats(){
     Dni: <b>${p.days.length?p.days.slice().sort().map(d=>DN[d]).join(" "):"żaden"}</b></div>
   <div class="hint">Powiadomienie systemowe dociera, gdy aplikacja jest otwarta lub w tle. Żeby przypomnienie zadziałało przy zablokowanym telefonie, ustaw dodatkowo budzik o tej samej godzinie.</div>
 
+  <div class="eyebrow" style="margin-top:26px">Kopia zapasowa</div>
+  <button class="rowbtn" onclick="exportData()">Zapisz kopię do pliku <span class="sw">${Object.keys(S.words).length+Object.keys(S.known).length} słów</span></button>
+  <button class="rowbtn" onclick="importPick()">Wczytaj kopię z pliku <span class="sw">scal</span></button>
+  <input type="file" id="impfile" accept="application/json,.json" style="display:none" onchange="importData(this)">
+  <div class="hint">Kopia zawiera słowa, powtórki, statystyki i wygenerowane teksty — bez klucza API. Przyda się przy przesiadce na inny telefon albo gdyby przeglądarka wyczyściła dane. Wczytywanie dokłada słowa do obecnych, nie kasuje ich.</div>
+
   <div class="eyebrow" style="margin-top:26px">Ustawienia</div>
   <button class="rowbtn" onclick="toggleTheme()">Motyw <span class="sw ${S.theme==="dark"?"on":""}">${S.theme==="dark"?"ciemny":"jasny"}</span></button>
   <button class="rowbtn" onclick="toggleTap()">Wymowa po dotknięciu słowa <span class="sw ${S.speakTap?"on":""}">${S.speakTap?"włączona":"wyłączona"}</span></button>
   <button class="rowbtn" onclick="toggleRate()">Tempo mowy <span class="sw ${S.rate<.8?"on":""}">${S.rate<.8?"wolne":"normalne"}</span></button>
   <button class="rowbtn" onclick="speak('This is how the pronunciation sounds.')">Sprawdź wymowę <span class="sw">test</span></button>
+  <button class="rowbtn" onclick="speechInfo()">Co z wymową? <span class="sw">diagnoza</span></button>
   <button class="rowbtn" onclick="fire()">Sprawdź przypomnienie <span class="sw">test</span></button>
   <div class="lab" style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin:14px 0 6px">Klucz API (opcjonalny)</div>
   <input class="txt" type="password" placeholder="sk-ant-… — tylko do pisania nowych tekstów" value="${S.apiKey||""}" onchange="setKey(this.value)">
@@ -1257,6 +1394,40 @@ function setTime(v){const[h,m]=v.split(":").map(Number);S.plan.hour=h||0;S.plan.
 function setMinutes(m){S.plan.minutes=m;save();scheduleAll();renderStats();}
 function setPerDay(n){S.plan.perDay=n;save();scheduleAll();renderStats();}
 function setKey(v){S.apiKey=v.trim();save();toast(S.apiKey?"Klucz zapisany":"Klucz usunięty");}
+
+/* ---------- kopia zapasowa ---------- */
+function exportData(){
+  const copy=Object.assign({},S);delete copy.apiKey;
+  const blob=new Blob([JSON.stringify(copy,null,1)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download="czytaj-i-ucz-sie-kopia-"+dayKey()+".json";
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),4000);
+  toast(`Kopia gotowa — ${Object.keys(S.words).length} słów`);
+}
+function importPick(){document.getElementById("impfile").click();}
+function importData(input){
+  const f=input.files&&input.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const o=JSON.parse(r.result);
+      if(!o||typeof o!=="object"||!o.words)throw new Error("zły plik");
+      const before=Object.keys(S.words).length;
+      S.words=Object.assign({},o.words,S.words);
+      S.known=Object.assign({},o.known||{},S.known);
+      S.hist=Object.assign({},o.hist||{},S.hist);
+      S.texts=(o.texts||[]).concat(S.texts||[]).filter((t,i,a)=>a.findIndex(x=>x.id===t.id)===i);
+      S.read=Object.assign({},o.read||{},S.read);
+      if(o.plan)S.plan=Object.assign(S.plan,o.plan);
+      save();meter();renderStats();scheduleAll();
+      toast(`Wczytano — słów: ${before} → ${Object.keys(S.words).length}`);
+    }catch(e){toast("Nie udało się wczytać tego pliku");}
+    input.value="";
+  };
+  r.readAsText(f);
+}
 function toggleTap(){S.speakTap=!S.speakTap;save();renderStats();}
 function toggleRate(){S.rate=S.rate<.8?.92:.68;save();renderStats();}
 
@@ -1266,7 +1437,7 @@ function toast(html){const t=document.getElementById("toast");t.innerHTML=html;t
 async function wipe(){
   if(!confirm("Usunąć wszystkie zebrane słowa, postępy i wygenerowane teksty?"))return;
   const th=S.theme,pl=S.plan,ak=S.apiKey;
-  S={words:{},texts:[],read:{},hist:{},theme:th,speakTap:true,rate:.92,lastReviewDay:"",reviewedToday:0,plan:pl,lastNotify:"",apiKey:ak};
+  S={words:{},texts:[],read:{},hist:{},known:{},theme:th,speakTap:true,rate:.92,lastReviewDay:"",reviewedToday:0,plan:pl,lastNotify:"",apiKey:ak};
   try{await Store.del(KEY);}catch(e){}
   save();renderStats();meter();toast("Dane usunięte");
 }
