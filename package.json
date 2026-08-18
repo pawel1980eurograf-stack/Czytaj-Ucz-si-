@@ -9,7 +9,10 @@
     "open": "cap open android",
     "run": "cap run android",
     "apk": "cd android && ./gradlew assembleDebug",
-    "apk:release": "cd android && ./gradlew assembleRelease"
+    "apk:release": "cd android && ./gradlew assembleRelease",
+    "ios:add": "cap add ios",
+    "ios:open": "cap open ios",
+    "ios:run": "cap run ios"
   },
   "dependencies": {
     "@capacitor/android": "^6.1.2",
@@ -17,7 +20,9 @@
     "@capacitor/local-notifications": "^6.1.0",
     "@capacitor/preferences": "^6.0.2",
     "@capacitor/splash-screen": "^6.0.2",
-    "@capacitor/status-bar": "^6.0.1"
+    "@capacitor/status-bar": "^6.0.1",
+    "@capacitor/ios": "^6.1.2",
+    "@capacitor/text-to-speech": "^6.0.1"
   },
   "devDependencies": {
     "@capacitor/cli": "^6.1.2"

@@ -15,5 +15,9 @@
       "backgroundColor": "#F2F1EC",
       "showSpinner": false
     }
+  },
+  "ios": {
+    "contentInset": "always",
+    "limitsNavigationsToAppBoundDomains": false
   }
 }
