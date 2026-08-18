@@ -28,6 +28,13 @@ jobs:
           distribution: temurin
           java-version: 21
 
+      - name: Ustaw stały klucz podpisu
+        # Bez tego każde budowanie podpisuje aplikację innym kluczem,
+        # a Android odmawia instalacji aktualizacji na wierzchu starej wersji.
+        run: |
+          mkdir -p ~/.android
+          cp debug.keystore ~/.android/debug.keystore
+
       - name: Zainstaluj zależności
         run: npm install
 
